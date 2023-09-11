@@ -1,0 +1,3 @@
+{{- include "ffc-helm-library.cluster-ip-service" (list . "ffc-pay-injection.cluster-ip-service") -}}
+{{- define "ffc-pay-injection.cluster-ip-service" -}}
+{{- end -}}

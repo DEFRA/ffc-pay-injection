@@ -1,0 +1,8 @@
+{{- include "ffc-helm-library.deployment" (list . "ffc-pay-injection.deployment") -}}
+{{- define "ffc-pay-injection.deployment" -}}
+spec:
+  template:
+    spec:
+      containers:
+      - {{ include "ffc-helm-library.container" (list . "ffc-pay-injection.container") }}
+{{- end -}}
