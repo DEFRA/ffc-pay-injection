@@ -21,24 +21,30 @@ containerSecret:
 deployment: {}
 
 container:
-  requestMemory: 100Mi
-  requestCpu: 100m
-  limitMemory: 100Mi
-  limitCpu: 100m
-  port: 3000
+  requestMemory: 10Mi
+  requestCpu: 10m
+  limitMemory: 180Mi
+  limitCpu: 120m
+  messageQueueHost: namespace.servicebus.windows.net
+  paymentTopicAddress: ffc-pay-request
+  azureStorageAccountName: ffcpay
+  azureStorageConnectionString: dummy
+  azureStorageUseConnectionString: false  
+  azureStorageCreateContainers: false
+  storageContainer: manual
+  inboundFolder: inbound
+  archiveFolder: archive
+  quarantineFolder: quarantine
 
-livenessProbe:
-  path: /healthz
-  port: 3000
-  initialDelaySeconds: 20
-  periodSeconds: 10
-  failureThreshold: 3
-  timeoutSeconds: 5
+postgresService:
+  postgresDb: ffc_pay_injection
+  postgresqlHost: ffc-pay-injection-postgres
+  postgresPort: 5432
+  postgresSchema: public
+  postgresUser: postgres
 
-readinessProbe:
-  path: /healthy
-  port: 3000
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  failureThreshold: 3
-  timeoutSeconds: 5
+aadPodIdentity: true
+
+azureIdentity:
+  clientID: not-a-real-clientID
+  resourceID: not-a-real-resourceID

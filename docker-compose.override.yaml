@@ -8,8 +8,25 @@ services:
     image: ffc-pay-injection-development
     container_name: ffc-pay-injection-development
     ports:
-      - "3000:3000"
-      - "9229:9229"
+      - "9201:9229"
     volumes:
       - ./app:/home/node/app
       - ./package.json:/home/node/package.json
+    environment:
+      AZURE_STORAGE_CONNECTION_STRING: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://ffc-pay-injection-azurite:10000/devstoreaccount1;
+
+  ffc-pay-injection-postgres:
+    ports:
+      - "5422:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  ffc-pay-injection-azurite:
+    volumes:
+      - azurite_data:/data
+    ports:
+      - "11000:10000"
+
+volumes:
+  azurite_data:
+  postgres_data:

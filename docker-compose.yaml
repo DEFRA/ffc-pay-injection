@@ -5,6 +5,33 @@ services:
       target: production
     image: ffc-pay-injection
     container_name: ffc-pay-injection
+    depends_on:
+      - ffc-pay-injection-azurite
     environment:
       APPINSIGHTS_CLOUDROLE: ffc-pay-injection-local
       APPINSIGHTS_CONNECTIONSTRING: ${APPINSIGHTS_CONNECTIONSTRING}
+      MESSAGE_QUEUE_HOST: ${MESSAGE_QUEUE_HOST}
+      MESSAGE_QUEUE_PASSWORD: ${MESSAGE_QUEUE_PASSWORD}
+      MESSAGE_QUEUE_USER: ${MESSAGE_QUEUE_USER}
+      PAYMENT_TOPIC_ADDRESS: ${PAYMENT_TOPIC_ADDRESS:-ffc-pay-request}${MESSAGE_QUEUE_SUFFIX}
+      EVENTS_TOPIC_ADDRESS: ${EVENTS_TOPIC_ADDRESS:-ffc-pay-events}${MESSAGE_QUEUE_SUFFIX}
+      AZURE_STORAGE_ACCOUNT_NAME: ${AZURE_STORAGE_ACCOUNT_NAME:-devstoreaccount1}
+      AZURE_STORAGE_USE_CONNECTION_STRING: "true"
+      AZURE_STORAGE_CREATE_CONTAINERS: "true"
+      POSTGRES_DB: ffc_pay_injection
+      POSTGRES_HOST: ${POSTGRES_HOST:-ffc-pay-injection-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_SCHEMA_PASSWORD:-ppp}
+      POSTGRES_PORT: 5432
+      POSTGRES_SCHEMA_NAME: ${POSTGRES_SCHEMA_NAME:-public}
+      POSTGRES_USERNAME: ${POSTGRES_SCHEMA_USERNAME:-postgres}
+
+  ffc-pay-injection-postgres:
+    image: postgres:11.4-alpine
+    environment:
+      POSTGRES_DB: ffc_pay_injection
+      POSTGRES_PASSWORD: ppp
+      POSTGRES_USERNAME: postgres
+
+  ffc-pay-injection-azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.17.1
+    command: "azurite-blob --skipApiVersionCheck --loose --blobHost 0.0.0.0"

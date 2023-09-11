@@ -2,6 +2,25 @@
 {{- define "ffc-pay-injection.config-map" -}}
 data:
   NODE_ENV: {{ quote .Values.environment }}
-  PORT: {{ quote .Values.container.port }}
   APPINSIGHTS_CLOUDROLE: {{ quote .Values.name }}
+  MESSAGE_QUEUE_HOST: {{ quote .Values.container.messageQueueHost }}
+  {{- if and (.Values.environmentCode) (not .Values.pr) }}
+  PAYMENT_TOPIC_ADDRESS: {{ .Values.container.paymentTopicAddress }}-{{ .Values.environmentCode }}
+  EVENTS_TOPIC_ADDRESS: {{ .Values.container.eventsTopicAddress }}-{{ .Values.environmentCode }}
+  {{ else }}
+  PAYMENT_TOPIC_ADDRESS: {{ quote .Values.container.paymentTopicAddress }}
+  EVENTS_TOPIC_ADDRESS: {{ quote .Values.container.eventsTopicAddress }}
+  {{- end }}
+  AZURE_STORAGE_ACCOUNT_NAME: {{ quote .Values.container.azureStorageAccountName }}
+  AZURE_STORAGE_CONNECTION_STRING: {{ quote .Values.container.azureStorageConnectionString }}
+  AZURE_STORAGE_USE_CONNECTION_STRING: {{ quote .Values.container.azureStorageUseConnectionString }}
+  AZURE_STORAGE_CREATE_CONTAINERS: {{ quote .Values.container.azureStorageCreateContainers }}
+  AZURE_STORAGE_CONTAINER: {{ quote .Values.container.storageContainer }}
+  AZURE_STORAGE_INBOUND: {{ quote .Values.container.inboundFolder }}
+  AZURE_STORAGE_ARCHIVE: {{ quote .Values.container.archiveFolder }}
+  AZURE_STORAGE_QUARANTINE: {{ quote .Values.container.quarantineFolder }}
+  POSTGRES_DB: {{ quote .Values.postgresService.postgresDb }}
+  POSTGRES_HOST: {{ quote .Values.postgresService.postgresqlHost }}
+  POSTGRES_PORT: {{ quote .Values.postgresService.postgresPort }}
+  POSTGRES_SCHEMA_NAME: {{ quote .Values.postgresService.postgresSchema }}
 {{- end -}}
