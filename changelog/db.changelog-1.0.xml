@@ -7,10 +7,15 @@
     <tagDatabase tag="v1.0.0" />
   </changeSet>
   <changeSet author="John Watson" id="3">
-    <createTable tableName="invoiceNumber">
-      <column autoIncrement="false" name="invoiceId" type="INTEGER">
+    <createTable tableName="invoiceNumbers">
+      <column autoIncrement="true" name="invoiceId" type="INTEGER">
         <constraints nullable="false" primaryKey="true" primaryKeyName="invoiceId_pkey" />
       </column>
+      <column name="schemeId" type="INTEGER" />
+      <column name="frn" type="BIGINT" />
+      <column name="agreementNumber" type="VARCHAR(255)" />
+      <column name="hash" type="VARCHAR(255)" />
+      <column name="created" type="TIMESTAMP" />
     </createTable>
   </changeSet>
   <changeSet author="John Watson" id="4">

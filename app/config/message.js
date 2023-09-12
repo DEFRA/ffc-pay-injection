@@ -25,7 +25,7 @@ const mqConfig = {
     appInsights: process.env.NODE_ENV === PRODUCTION ? require('applicationinsights') : undefined
   },
   paymentTopic: {
-    address: process.env.EVENT_TOPIC_ADDRESS
+    address: process.env.PAYMENT_TOPIC_ADDRESS
   },
   eventsTopic: {
     address: process.env.EVENTS_TOPIC_ADDRESS

@@ -27,7 +27,7 @@ const value = result.value
 value.isDev = value.env === DEVELOPMENT
 value.isTest = value.env === TEST
 value.isProd = value.env === PRODUCTION
-value.paymentSubscription = mqConfig.paymentSubscription
+value.paymentTopic = mqConfig.paymentTopic
 value.eventsTopic = mqConfig.eventsTopic
 value.storageConfig = storageConfig
 value.dbConfig = dbConfig

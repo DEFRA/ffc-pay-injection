@@ -1,7 +1,8 @@
 const db = require('../data')
 const config = require('../config')
 const { getInboundFileList } = require('../storage')
-const { isPaymentFile, processPaymentFile } = require('./payments')
+const { isPaymentFile } = require('./is-payment-file')
+const { processPaymentFile } = require('./process-payment-file')
 
 const start = async () => {
   const transaction = await db.sequelize.transaction()
@@ -13,7 +14,7 @@ const start = async () => {
     if (filenames.length > 0) {
       for (const filename of filenames) {
         if (isPaymentFile(filename)) {
-          await processPaymentFile(filename)
+          await processPaymentFile(filename, transaction)
         }
       }
     }
