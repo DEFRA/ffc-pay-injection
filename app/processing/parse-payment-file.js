@@ -19,6 +19,7 @@ const parsePaymentFile = async (data, filename, transaction) => {
       frn: values[1],
       marketingYear: values[2],
       agreementNumber: values[3],
+      dueDate: values[7],
       invoiceLines: [],
       value: 0
     })
@@ -39,7 +40,7 @@ const parsePaymentFile = async (data, filename, transaction) => {
     paymentRequest.contractNumber = paymentRequest.agreementNumber
     paymentRequest.currency = GBP
     paymentRequest.batch = filename
-    paymentRequest.dueDate = moment()
+    paymentRequest.dueDate = moment(paymentRequest.dueDate, ['DD/MM/YYYY', 'YYYY-MM-DD', 'DD-MM-YYYY']).format('YYYY-MM-DD')
     paymentRequest.value = convertToPounds(paymentRequest.value)
     paymentRequest.invoiceNumber = await createInvoiceNumber(paymentRequest, transaction)
   }
