@@ -1,4 +1,4 @@
-const descriptions = require('../constants/description')
+const descriptions = require('../constants/descriptions')
 
 const getDescription = (code) => {
   const matchedDescription = descriptions[code]
