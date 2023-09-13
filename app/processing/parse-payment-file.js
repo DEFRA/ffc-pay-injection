@@ -3,8 +3,9 @@ const { v4: uuidv4 } = require('uuid')
 const { GBP } = require('../constants/currency')
 const { INJECTION } = require('../constants/source-system')
 const { getSchemeId } = require('./get-scheme-id')
-const { createInvoiceNumber } = require('./create-invoice-number')
+const { getDescription } = require('./get-description')
 const { convertToPence, convertToPounds } = require('../currency-convert')
+const { createInvoiceNumber } = require('./create-invoice-number')
 
 const parsePaymentFile = async (data, filename, transaction) => {
   const csv = data.trim().split(/\r?\n/)
@@ -26,7 +27,7 @@ const parsePaymentFile = async (data, filename, transaction) => {
     item.value += convertToPence(values[6])
     item.invoiceLines.push({
       schemeCode: values[4],
-      description: values[5],
+      description: getDescription(values[5]),
       value: values[6]
     })
 
