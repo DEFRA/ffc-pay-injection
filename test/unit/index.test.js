@@ -1,5 +1,5 @@
 jest.mock('../../app/processing')
-const mockProcessing = require('../../app/processing')
+const { start } = require('../../app/processing')
 
 describe('app', () => {
   beforeEach(() => {
@@ -7,6 +7,6 @@ describe('app', () => {
   })
 
   test('starts processing', async () => {
-    expect(mockProcessing.start).toHaveBeenCalled()
+    expect(start).toHaveBeenCalled()
   })
 })
