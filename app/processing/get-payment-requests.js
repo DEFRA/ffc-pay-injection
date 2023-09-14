@@ -15,6 +15,7 @@ const getPaymentRequests = (csv) => {
       marketingYear: values[2],
       agreementNumber: values[3],
       dueDate: values[7],
+      schedule: values[8],
       invoiceLines: [],
       value: 0
     })
