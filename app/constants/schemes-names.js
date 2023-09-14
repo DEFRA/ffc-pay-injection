@@ -6,7 +6,7 @@ module.exports = {
   CS: 'CS',
   BPS: 'BPS',
   FDMR: 'FDMR',
-  MANUAL: 'MANUAL',
+  MANUAL: 'Manual',
   ES: 'ES',
   FC: 'FC',
   IMPS: 'IMPS',
