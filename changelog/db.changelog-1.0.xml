@@ -14,7 +14,6 @@
       <column name="schemeId" type="INTEGER" />
       <column name="frn" type="BIGINT" />
       <column name="agreementNumber" type="VARCHAR(255)" />
-      <column name="hash" type="VARCHAR(255)" />
       <column name="created" type="TIMESTAMP" />
     </createTable>
   </changeSet>

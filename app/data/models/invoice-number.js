@@ -4,7 +4,6 @@ module.exports = (sequelize, DataTypes) => {
     schemeId: DataTypes.INTEGER,
     frn: DataTypes.BIGINT,
     agreementNumber: DataTypes.STRING,
-    hash: DataTypes.STRING,
     created: DataTypes.DATE
   },
   {

@@ -43,12 +43,6 @@ describe('create invoice number', () => {
     expect(invoiceNumberRecord.agreementNumber).toBe(paymentRequest.agreementNumber)
   })
 
-  test('should save hash', async () => {
-    await createInvoiceNumber(paymentRequest)
-    const invoiceNumberRecord = await db.invoiceNumber.findOne()
-    expect(invoiceNumberRecord.hash).toBe('3D6954D1')
-  })
-
   test('should save created date', async () => {
     await createInvoiceNumber(paymentRequest)
     const invoiceNumberRecord = await db.invoiceNumber.findOne()
