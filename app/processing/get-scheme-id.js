@@ -29,42 +29,42 @@ const {
 } = require('../constants/schemes-names')
 
 const getSchemeId = (scheme) => {
-  switch (scheme) {
-    case SFI:
-    case SFI_NAME:
+  switch (scheme.toString().toLowerCase()) {
+    case SFI.toString():
+    case SFI_NAME.toLowerCase():
       return SFI
-    case SFIP:
-    case SFIP_NAME:
+    case SFIP.toString():
+    case SFIP_NAME.toLowerCase():
       return SFIP
-    case LumpSums:
-    case LSES_NAME:
+    case LumpSums.toString():
+    case LSES_NAME.toLowerCase():
       return LumpSums
-    case VetVisits:
-    case AHWR_NAME:
+    case VetVisits.toString():
+    case AHWR_NAME.toLowerCase():
       return VetVisits
-    case CS:
-    case CS_NAME:
+    case CS.toString():
+    case CS_NAME.toLowerCase():
       return CS
-    case BPS:
-    case BPS_NAME:
+    case BPS.toString():
+    case BPS_NAME.toLowerCase():
       return BPS
-    case FDMR:
-    case FDMR_NAME:
+    case FDMR.toString():
+    case FDMR_NAME.toLowerCase():
       return FDMR
-    case MANUAL:
-    case MANUAL_NAME:
+    case MANUAL.toString():
+    case MANUAL_NAME.toLowerCase():
       return MANUAL
-    case ES:
-    case ES_NAME:
+    case ES.toString():
+    case ES_NAME.toLowerCase():
       return ES
-    case FC:
-    case FC_NAME:
+    case FC.toString():
+    case FC_NAME.toLowerCase():
       return FC
-    case IMPS:
-    case IMPS_NAME:
+    case IMPS.toString():
+    case IMPS_NAME.toLowerCase():
       return IMPS
-    case SFI23:
-    case SFI23_NAME:
+    case SFI23.toString():
+    case SFI23_NAME.toLowerCase():
       return SFI23
     default:
       throw new Error(`Scheme ${scheme} is not recognised`)
