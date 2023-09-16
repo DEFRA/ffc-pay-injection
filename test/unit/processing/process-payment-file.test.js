@@ -10,6 +10,9 @@ const { quarantineFile } = require('../../../app/processing/quarantine-file')
 jest.mock('../../../app/messaging')
 const { sendPaymentMessages } = require('../../../app/messaging')
 
+jest.mock('../../../app/event')
+const { sendSuccessEvent } = require('../../../app/event')
+
 const { processPaymentFile } = require('../../../app/processing/process-payment-file')
 
 const filename = 'FFCS_Manual_Batch_20230913140000.csv'
@@ -62,5 +65,10 @@ describe('process payment file', () => {
   test('should send messages if parse succeeds', async () => {
     await processPaymentFile(filename)
     expect(sendPaymentMessages).toHaveBeenCalled()
+  })
+
+  test('should send success event if parse succeeds', async () => {
+    await processPaymentFile(filename)
+    expect(sendSuccessEvent).toHaveBeenCalledWith(filename)
   })
 })

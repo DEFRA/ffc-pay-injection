@@ -1,5 +1,5 @@
 const storage = require('../storage')
-const { sendQuarantineEvent } = require('../event/send-quarantine-event')
+const { sendQuarantineEvent } = require('../event')
 
 const quarantineFile = async (filename, error) => {
   console.error(`Quarantining ${filename}, failed to parse file`, error)
