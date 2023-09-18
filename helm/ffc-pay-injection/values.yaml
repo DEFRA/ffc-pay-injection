@@ -27,6 +27,7 @@ container:
   limitCpu: 120m
   messageQueueHost: namespace.servicebus.windows.net
   paymentTopicAddress: ffc-pay-request
+  eventsTopicAddress: ffc-pay-events
   azureStorageAccountName: ffcpay
   azureStorageConnectionString: dummy
   azureStorageUseConnectionString: false  
