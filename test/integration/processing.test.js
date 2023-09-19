@@ -160,7 +160,7 @@ describe('process files', () => {
 
     await start()
 
-    expect(mockSendBatchMessages.mock.calls[0][0][0].body.invoiceNumber.endsWith('Z00000001V00')).toBe(true)
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.invoiceNumber.endsWith('Z00000001V000')).toBe(true)
   })
 
   test('sends payment request with invoice lines', async () => {
