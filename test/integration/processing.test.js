@@ -48,6 +48,7 @@ const multiPaymentFilepath = path.resolve(__dirname, '../files', 'multi-payment.
 const scheduleFilepath = path.resolve(__dirname, '../files', 'schedule.csv')
 const manualFilepath = path.resolve(__dirname, '../files', 'manual.csv')
 const manualLedgerFilepath = path.resolve(__dirname, '../files', 'manual-ledger.csv')
+const manualLedgerRecoveryFilepath = path.resolve(__dirname, '../files', 'manual-ledger-recovery.csv')
 
 let blobServiceClient
 let container
@@ -341,5 +342,23 @@ describe('process files', () => {
     await start()
 
     expect(mockSendBatchMessages.mock.calls[0][0][0].body.ledger).toBe(AR)
+  })
+
+  test('sends payment request with debt type to lower case for manual', async () => {
+    const blockBlobClient = container.getBlockBlobClient(`${storageConfig.inboundFolder}/${filename}`)
+    await blockBlobClient.uploadFile(manualLedgerRecoveryFilepath)
+
+    await start()
+
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.debtType).toBe('adm')
+  })
+
+  test('sends payment request with recovery date for manual', async () => {
+    const blockBlobClient = container.getBlockBlobClient(`${storageConfig.inboundFolder}/${filename}`)
+    await blockBlobClient.uploadFile(manualLedgerRecoveryFilepath)
+
+    await start()
+
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.recoveryDate).toBe('2023-10-01')
   })
 })

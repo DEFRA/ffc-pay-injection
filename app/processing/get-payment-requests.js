@@ -19,6 +19,8 @@ const getPaymentRequests = (csv) => {
       dueDate: values[7],
       schedule: values[8] || undefined,
       ledger: values[10] || AP,
+      debtType: values[11] || undefined,
+      recoveryDate: values[12] || undefined,
       pillar: schemeValues[1],
       invoiceLines: [],
       value: 0
