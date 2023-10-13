@@ -39,6 +39,7 @@ const { start } = require('../../app/processing')
 const { BATCH_QUARANTINED, BATCH_PROCESSED } = require('../../app/constants/events')
 const { GBP } = require('../../app/constants/currency')
 const { MANUAL } = require('../../app/constants/schemes')
+const { AP, AR } = require('../../app/constants/ledgers')
 
 const filename = 'FFC_Manual_Batch_20201001.csv'
 const minimalFilepath = path.resolve(__dirname, '../files', 'minimal.csv')
@@ -46,6 +47,7 @@ const multiLineFilepath = path.resolve(__dirname, '../files', 'multi-line.csv')
 const multiPaymentFilepath = path.resolve(__dirname, '../files', 'multi-payment.csv')
 const scheduleFilepath = path.resolve(__dirname, '../files', 'schedule.csv')
 const manualFilepath = path.resolve(__dirname, '../files', 'manual.csv')
+const manualLedgerFilepath = path.resolve(__dirname, '../files', 'manual-ledger.csv')
 
 let blobServiceClient
 let container
@@ -161,6 +163,15 @@ describe('process files', () => {
     await start()
 
     expect(mockSendBatchMessages.mock.calls[0][0][0].body.invoiceNumber.endsWith('Z00000001V000')).toBe(true)
+  })
+
+  test('sends payment request with AP ledger if not supplied', async () => {
+    const blockBlobClient = container.getBlockBlobClient(`${storageConfig.inboundFolder}/${filename}`)
+    await blockBlobClient.uploadFile(minimalFilepath)
+
+    await start()
+
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.ledger.endsWith(AP)).toBe(true)
   })
 
   test('sends payment request with invoice lines', async () => {
@@ -312,5 +323,23 @@ describe('process files', () => {
     await start()
 
     expect(mockSendBatchMessages.mock.calls[0][0][0].body.pillar).toBe('SFI')
+  })
+
+  test('sends payment request with AP ledger if not supplied for manual', async () => {
+    const blockBlobClient = container.getBlockBlobClient(`${storageConfig.inboundFolder}/${filename}`)
+    await blockBlobClient.uploadFile(manualFilepath)
+
+    await start()
+
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.ledger).toBe(AP)
+  })
+
+  test('sends payment request with ledger supplied for manual', async () => {
+    const blockBlobClient = container.getBlockBlobClient(`${storageConfig.inboundFolder}/${filename}`)
+    await blockBlobClient.uploadFile(manualLedgerFilepath)
+
+    await start()
+
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.ledger).toBe(AR)
   })
 })

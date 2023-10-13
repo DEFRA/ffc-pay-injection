@@ -1,3 +1,4 @@
+const { AP } = require('../constants/ledgers')
 const { convertToPence } = require('../currency-convert')
 const { getDescription } = require('./get-description')
 const { getSchemeId } = require('./get-scheme-id')
@@ -17,6 +18,7 @@ const getPaymentRequests = (csv) => {
       agreementNumber: values[3],
       dueDate: values[7],
       schedule: values[8] || undefined,
+      ledger: values[10] || AP,
       pillar: schemeValues[1],
       invoiceLines: [],
       value: 0
