@@ -19,6 +19,7 @@ const parsePaymentFile = async (data, filename, transaction) => {
     paymentRequest.batch = filename
     paymentRequest.dueDate = paymentRequest.dueDate ? moment(paymentRequest.dueDate, ['DD/MM/YYYY', 'YYYY-MM-DD', 'DD-MM-YYYY']).format('YYYY-MM-DD') : undefined
     paymentRequest.recoveryDate = paymentRequest.recoveryDate ? moment(paymentRequest.recoveryDate, ['DD/MM/YYYY', 'YYYY-MM-DD', 'DD-MM-YYYY']).format('YYYY-MM-DD') : undefined
+    paymentRequest.originalSettlementDate = paymentRequest.originalSettlementDate ? moment(paymentRequest.originalSettlementDate, ['DD/MM/YYYY', 'YYYY-MM-DD', 'DD-MM-YYYY']).format('YYYY-MM-DD') : undefined
     paymentRequest.debtType = paymentRequest.debtType?.toLowerCase()
     paymentRequest.value = convertToPounds(paymentRequest.value)
     paymentRequest.invoiceNumber = await createInvoiceNumber(paymentRequest, transaction)
