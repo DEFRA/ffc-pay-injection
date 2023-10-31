@@ -363,6 +363,24 @@ describe('process files', () => {
     expect(mockSendBatchMessages.mock.calls[0][0][0].body.recoveryDate).toBe('2023-10-01')
   })
 
+  test('sends payment request with original invoice number for manual', async () => {
+    const blockBlobClient = container.getBlockBlobClient(`${storageConfig.inboundFolder}/${filename}`)
+    await blockBlobClient.uploadFile(manualLedgerRecoveryFilepath)
+
+    await start()
+
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.originalInvoiceNumber).toBe('S123456789C123456V001')
+  })
+
+  test('sends payment request with original settlement date for manual', async () => {
+    const blockBlobClient = container.getBlockBlobClient(`${storageConfig.inboundFolder}/${filename}`)
+    await blockBlobClient.uploadFile(manualLedgerRecoveryFilepath)
+
+    await start()
+
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.originalSettlementDate).toBe('2023-10-01')
+  })
+
   test('sends payment request for file with quotes', async () => {
     const blockBlobClient = container.getBlockBlobClient(`${storageConfig.inboundFolder}/${filename}`)
     await blockBlobClient.uploadFile(quotesFilepath)
