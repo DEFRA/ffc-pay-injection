@@ -7,7 +7,7 @@ const { createInvoiceNumber } = require('./create-invoice-number')
 const { getPaymentRequests } = require('./get-payment-requests')
 
 const parsePaymentFile = async (data, filename, transaction) => {
-  const csv = data.trim().split(/\r?\n/)
+  const csv = data.trim().replace(/(['"])/g, '').split(/\r?\n/)
   const paymentRequests = getPaymentRequests(csv)
 
   for (const paymentRequest of paymentRequests) {
