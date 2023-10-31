@@ -21,6 +21,8 @@ const getPaymentRequests = (csv) => {
       ledger: values[10] || AP,
       debtType: values[11] || undefined,
       recoveryDate: values[12] || undefined,
+      originalInvoiceNumber: values[13] || undefined,
+      originalSettlementDate: values[14] || undefined,
       pillar: schemeValues[1],
       invoiceLines: [],
       value: 0
