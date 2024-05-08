@@ -10,5 +10,6 @@ module.exports = {
   ES: 9,
   FC: 10,
   IMPS: 11,
-  SFI23: 12
+  SFI23: 12,
+  DELINKED: 13
 }
