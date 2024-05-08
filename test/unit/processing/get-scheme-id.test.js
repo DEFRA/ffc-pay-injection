@@ -10,7 +10,8 @@ const {
   ES,
   FC,
   IMPS,
-  SFI23
+  SFI23,
+  DELINKED
 } = require('../../../app/constants/schemes')
 
 const {
@@ -25,7 +26,8 @@ const {
   ES: ES_NAME,
   FC: FC_NAME,
   IMPS: IMPS_NAME,
-  SFI23: SFI23_NAME
+  SFI23: SFI23_NAME,
+  DELINKED: DELINKED_NAME
 } = require('../../../app/constants/schemes-names')
 
 const { getSchemeId } = require('../../../app/processing/get-scheme-id')
@@ -149,6 +151,16 @@ describe('get scheme id', () => {
   test('should return SFI23 if SFI23 scheme name', () => {
     const result = getSchemeId(SFI23_NAME)
     expect(result).toBe(SFI23)
+  })
+
+  test('should return DELINKED if DELINKED scheme Id', () => {
+    const result = getSchemeId(DELINKED)
+    expect(result).toBe(DELINKED)
+  })
+
+  test('should return DELINKED if DELINKED scheme name', () => {
+    const result = getSchemeId(DELINKED_NAME)
+    expect(result).toBe(DELINKED)
   })
 
   test('should throw error if scheme Id not recognised', () => {

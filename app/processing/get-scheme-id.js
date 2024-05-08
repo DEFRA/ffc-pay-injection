@@ -10,7 +10,8 @@ const {
   ES,
   FC,
   IMPS,
-  SFI23
+  SFI23,
+  DELINKED
 } = require('../constants/schemes')
 
 const {
@@ -25,7 +26,8 @@ const {
   ES: ES_NAME,
   FC: FC_NAME,
   IMPS: IMPS_NAME,
-  SFI23: SFI23_NAME
+  SFI23: SFI23_NAME,
+  DELINKED: DELINKED_NAME
 } = require('../constants/schemes-names')
 
 const getSchemeId = (scheme) => {
@@ -66,6 +68,9 @@ const getSchemeId = (scheme) => {
     case SFI23.toString():
     case SFI23_NAME.toLowerCase():
       return SFI23
+    case DELINKED.toString():
+    case DELINKED_NAME.toLowerCase():
+      return DELINKED
     default:
       throw new Error(`Scheme ${scheme} is not recognised`)
   }
