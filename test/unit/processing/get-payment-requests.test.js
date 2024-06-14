@@ -288,7 +288,7 @@ describe('get payment requests from csv contents', () => {
       recoveryDate: undefined,
       originalInvoiceNumber: undefined,
       originalSettlementDate: undefined,
-      documentType: 'Advance',
+      documentType: 'SFI23-Advance',
       pillar: undefined,
       invoiceLines: [
         {
