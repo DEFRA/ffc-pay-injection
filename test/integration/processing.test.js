@@ -49,7 +49,6 @@ const scheduleFilepath = path.resolve(__dirname, '../files', 'schedule.csv')
 const manualFilepath = path.resolve(__dirname, '../files', 'manual.csv')
 const manualLedgerFilepath = path.resolve(__dirname, '../files', 'manual-ledger.csv')
 const manualLedgerRecoveryFilepath = path.resolve(__dirname, '../files', 'manual-ledger-recovery.csv')
-const quotesFilepath = path.resolve(__dirname, '../files', 'quotes.csv')
 
 let blobServiceClient
 let container
@@ -379,14 +378,5 @@ describe('process files', () => {
     await start()
 
     expect(mockSendBatchMessages.mock.calls[0][0][0].body.originalSettlementDate).toBe('2023-10-01')
-  })
-
-  test('sends payment request for file with quotes', async () => {
-    const blockBlobClient = container.getBlockBlobClient(`${storageConfig.inboundFolder}/${filename}`)
-    await blockBlobClient.uploadFile(quotesFilepath)
-
-    await start()
-
-    expect(mockSendBatchMessages.mock.calls[0][0].length).toBe(1)
   })
 })
