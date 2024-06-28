@@ -1,6 +1,6 @@
 {
   "name": "ffc-pay-injection",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Inject payments",
   "homepage": "https://github.com/DEFRA/ffc-pay-injection",
   "main": "app/index.js",
@@ -20,10 +20,10 @@
   ],
   "license": "OGL-UK-3.0",
   "dependencies": {
-    "@azure/identity": "3.3.0",
+    "@azure/identity": "4.3.0",
     "@azure/storage-blob": "12.15.0",
     "applicationinsights": "2.7.3",
-    "ffc-messaging": "2.7.0",
+    "ffc-messaging": "2.9.1",
     "ffc-pay-event-publisher": "1.2.0",
     "log-timestamp": "0.3.0",
     "moment": "2.29.4",

@@ -11,5 +11,6 @@ module.exports = {
   FC: 10,
   IMPS: 11,
   SFI23: 12,
-  DELINKED: 13
+  DELINKED: 13,
+  SFI_EXPANDED: 14
 }
