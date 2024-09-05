@@ -30,7 +30,7 @@ through the Docker Compose
 
 ```
 # Build container images
-docker-compose build
+docker compose build
 ```
 
 ### Start
@@ -38,7 +38,7 @@ docker-compose build
 Use Docker Compose to run service locally.
 
 ```
-docker-compose up
+docker compose up
 ```
 
 ## Test structure
@@ -51,7 +51,7 @@ The tests have been structured into subfolders of `./test` as per the
 A convenience script is provided to run automated tests in a containerised
 environment. This will rebuild images before running tests via docker-compose,
 using a combination of `docker-compose.yaml` and `docker-compose.test.yaml`.
-The command given to `docker-compose run` may be customised by passing
+The command given to `docker compose run` may be customised by passing
 arguments to the test script.
 
 Examples:
