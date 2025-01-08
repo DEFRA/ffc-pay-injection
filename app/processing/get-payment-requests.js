@@ -34,7 +34,8 @@ const getPaymentRequests = (csv) => {
       value: values[6],
       accountCode: values[9],
       fundCode: values[15],
-      deliveryBody: values[16]
+      deliveryBody: values[16],
+      agreementNumber: values[17]
     })
 
     return x.set(key, item)
