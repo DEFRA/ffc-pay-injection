@@ -32,7 +32,10 @@ const getPaymentRequests = (csv) => {
       schemeCode: values[4],
       description: getDescription(values[5]),
       value: values[6],
-      accountCode: values[9]
+      accountCode: values[9],
+      fundCode: values[15],
+      deliveryBody: values[16],
+      agreementNumber: values[17]
     })
 
     return x.set(key, item)

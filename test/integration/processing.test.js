@@ -49,6 +49,8 @@ const scheduleFilepath = path.resolve(__dirname, '../files', 'schedule.csv')
 const manualFilepath = path.resolve(__dirname, '../files', 'manual.csv')
 const manualLedgerFilepath = path.resolve(__dirname, '../files', 'manual-ledger.csv')
 const manualLedgerRecoveryFilepath = path.resolve(__dirname, '../files', 'manual-ledger-recovery.csv')
+const csFilePath = path.resolve(__dirname, '../files', 'cs.csv')
+const csMaoassbiFilePath = path.resolve(__dirname, '../files', 'cs-maoassbi.csv')
 const quotesFilepath = path.resolve(__dirname, '../files', 'quotes.csv')
 
 let blobServiceClient
@@ -379,6 +381,44 @@ describe('process files', () => {
     await start()
 
     expect(mockSendBatchMessages.mock.calls[0][0][0].body.originalSettlementDate).toBe('2023-10-01')
+  })
+
+  test('sends payment request with fund code supplied for manual', async () => {
+    const blockBlobClient = container.getBlockBlobClient(`${storageConfig.inboundFolder}/${filename}`)
+    await blockBlobClient.uploadFile(csFilePath)
+
+    await start()
+
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.invoiceLines[0].fundCode).toBe('DRD10')
+  })
+
+  test('sends payment request with delivery body supplied for manual', async () => {
+    const blockBlobClient = container.getBlockBlobClient(`${storageConfig.inboundFolder}/${filename}`)
+    await blockBlobClient.uploadFile(csFilePath)
+
+    await start()
+
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.invoiceLines[0].deliveryBody).toBe('NE00')
+  })
+
+  test('sends payment request with agreement number supplied for manual', async () => {
+    const blockBlobClient = container.getBlockBlobClient(`${storageConfig.inboundFolder}/${filename}`)
+    await blockBlobClient.uploadFile(csFilePath)
+
+    await start()
+
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.invoiceLines[0].agreementNumber).toBe('A01000000001/MT')
+  })
+
+  test('sends payment request with multiple agreements on a single sbi claim (MAOASSBI)', async () => {
+    const blockBlobClient = container.getBlockBlobClient(`${storageConfig.inboundFolder}/${filename}`)
+    await blockBlobClient.uploadFile(csMaoassbiFilePath)
+
+    await start()
+
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.invoiceLines.length).toBe(2)
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.invoiceLines[0].agreementNumber).toBe('A01000000001/MT')
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.invoiceLines[1].agreementNumber).toBe('A01000000002/MT')
   })
 
   test('sends payment request for file with quotes', async () => {
