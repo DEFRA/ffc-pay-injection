@@ -15,7 +15,7 @@ const getPaymentRequests = (csv) => {
       schemeId,
       frn: values[1],
       marketingYear: values[2],
-      agreementNumber: values[3],
+      contractNumber: values[3],
       dueDate: values[7] || undefined,
       schedule: values[8] || undefined,
       ledger: values[10] || AP,

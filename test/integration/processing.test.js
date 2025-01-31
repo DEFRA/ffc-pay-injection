@@ -124,13 +124,13 @@ describe('process files', () => {
     expect(mockSendBatchMessages.mock.calls[0][0][0].body.contractNumber).toBe('Z00000001')
   })
 
-  test('sends payment request for file with agreement number', async () => {
+  test('sends payment request for file with contract number', async () => {
     const blockBlobClient = container.getBlockBlobClient(`${storageConfig.inboundFolder}/${filename}`)
     await blockBlobClient.uploadFile(minimalFilepath)
 
     await start()
 
-    expect(mockSendBatchMessages.mock.calls[0][0][0].body.agreementNumber).toBe('Z00000001')
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.contractNumber).toBe('Z00000001')
   })
 
   test('sends payment request for file with currency', async () => {
@@ -408,6 +408,15 @@ describe('process files', () => {
     await start()
 
     expect(mockSendBatchMessages.mock.calls[0][0][0].body.invoiceLines[0].agreementNumber).toBe('A01000000001/MT')
+  })
+
+  test('sends payment request with agreement number at payment request level, if supplied for invoice lines', async () => {
+    const blockBlobClient = container.getBlockBlobClient(`${storageConfig.inboundFolder}/${filename}`)
+    await blockBlobClient.uploadFile(csFilePath)
+
+    await start()
+
+    expect(mockSendBatchMessages.mock.calls[0][0][0].body.agreementNumber).toBe('A01000000001/MT')
   })
 
   test('sends payment request with multiple agreements on a single sbi claim (MAOASSBI)', async () => {

@@ -14,7 +14,6 @@ const parsePaymentFile = async (data, filename, transaction) => {
     paymentRequest.sourceSystem = INJECTION
     paymentRequest.paymentRequestNumber = 0
     paymentRequest.correlationId = uuidv4()
-    paymentRequest.contractNumber = paymentRequest.agreementNumber
     paymentRequest.currency = GBP
     paymentRequest.batch = filename
     paymentRequest.dueDate = paymentRequest.dueDate ? moment(paymentRequest.dueDate, ['DD/MM/YYYY', 'YYYY-MM-DD', 'DD-MM-YYYY']).format('YYYY-MM-DD') : undefined
@@ -23,6 +22,7 @@ const parsePaymentFile = async (data, filename, transaction) => {
     paymentRequest.debtType = paymentRequest.debtType?.toLowerCase()
     paymentRequest.value = convertToPounds(paymentRequest.value)
     paymentRequest.invoiceNumber = await createInvoiceNumber(paymentRequest, transaction)
+    paymentRequest.agreementNumber = paymentRequest.invoiceLines?.[0]?.agreementNumber
   }
 
   return paymentRequests
