@@ -6,6 +6,9 @@ const { convertToPounds } = require('../currency-convert')
 const { createInvoiceNumber } = require('./create-invoice-number')
 const { getPaymentRequests } = require('./get-payment-requests')
 
+const outputDateFormat = 'YYYY-MM-DD'
+const acceptedDateFormats = ['DD/MM/YYYY', outputDateFormat, 'DD-MM-YYYY']
+
 const parsePaymentFile = async (data, filename, transaction) => {
   const csv = data.trim().replace(/(['"])/g, '').split(/\r?\n/)
   const paymentRequests = getPaymentRequests(csv)
@@ -16,9 +19,9 @@ const parsePaymentFile = async (data, filename, transaction) => {
     paymentRequest.correlationId = uuidv4()
     paymentRequest.currency = GBP
     paymentRequest.batch = filename
-    paymentRequest.dueDate = paymentRequest.dueDate ? moment(paymentRequest.dueDate, ['DD/MM/YYYY', 'YYYY-MM-DD', 'DD-MM-YYYY']).format('YYYY-MM-DD') : undefined
-    paymentRequest.recoveryDate = paymentRequest.recoveryDate ? moment(paymentRequest.recoveryDate, ['DD/MM/YYYY', 'YYYY-MM-DD', 'DD-MM-YYYY']).format('YYYY-MM-DD') : undefined
-    paymentRequest.originalSettlementDate = paymentRequest.originalSettlementDate ? moment(paymentRequest.originalSettlementDate, ['DD/MM/YYYY', 'YYYY-MM-DD', 'DD-MM-YYYY']).format('YYYY-MM-DD') : undefined
+    paymentRequest.dueDate = paymentRequest.dueDate ? moment(paymentRequest.dueDate, acceptedDateFormats).format(outputDateFormat) : undefined
+    paymentRequest.recoveryDate = paymentRequest.recoveryDate ? moment(paymentRequest.recoveryDate, acceptedDateFormats).format(outputDateFormat) : undefined
+    paymentRequest.originalSettlementDate = paymentRequest.originalSettlementDate ? moment(paymentRequest.originalSettlementDate, acceptedDateFormats).format(outputDateFormat) : undefined
     paymentRequest.debtType = paymentRequest.debtType?.toLowerCase()
     paymentRequest.value = convertToPounds(paymentRequest.value)
     paymentRequest.invoiceNumber = await createInvoiceNumber(paymentRequest, transaction)
