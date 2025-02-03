@@ -3,39 +3,62 @@ const { convertToPence } = require('../currency-convert')
 const { getDescription } = require('./get-description')
 const { getSchemeId } = require('./get-scheme-id')
 
+const indexes = {
+  schemeIndex: 0,
+  schemeSchemeIndex: 0,
+  schemePillarIndex: 1,
+  frnIndex: 1,
+  marketingYearIndex: 2,
+  contractNumberIndex: 3,
+  valueIndex: 6,
+  dueDateIndex: 7,
+  scheduleIndex: 8,
+  ledgerIndex: 10,
+  debtTypeIndex: 11,
+  recoveryDateIndex: 12,
+  originalInvoiceNumberIndex: 13,
+  originalSettlementDateIndex: 14,
+  schemeCodeIndex: 4,
+  descriptionIndex: 5,
+  accountCodeIndex: 9,
+  fundCodeIndex: 15,
+  deliveryBodyIndex: 16,
+  agreementNumberIndex: 17
+}
+
 const getPaymentRequests = (csv) => {
   return [...csv.filter(x => x).reduce((x, y) => {
     const values = y.split(',')
-    const schemeValues = values[0].split('_')
-    const schemeId = getSchemeId(schemeValues[0])
-    const key = `${schemeId}-${values[1]}-${values[2]}-${values[3]}`
+    const schemeValues = values[indexes.schemeIndex].split('_')
+    const schemeId = getSchemeId(schemeValues[indexes.schemeSchemeIndex])
+    const key = `${schemeId}-${values[indexes.frnIndex]}-${values[indexes.marketingYearIndex]}-${values[indexes.contractNumberIndex]}`
 
     // if key doesn't exist then first instance so create new group
     const item = x.get(key) || ({
       schemeId,
-      frn: values[1],
-      marketingYear: values[2],
-      agreementNumber: values[3],
-      dueDate: values[7] || undefined,
-      schedule: values[8] || undefined,
-      ledger: values[10] || AP,
-      debtType: values[11] || undefined,
-      recoveryDate: values[12] || undefined,
-      originalInvoiceNumber: values[13] || undefined,
-      originalSettlementDate: values[14] || undefined,
-      pillar: schemeValues[1],
+      frn: values[indexes.frnIndex],
+      marketingYear: values[indexes.marketingYearIndex],
+      contractNumber: values[indexes.contractNumberIndex],
+      dueDate: values[indexes.dueDateIndex] || undefined,
+      schedule: values[indexes.scheduleIndex] || undefined,
+      ledger: values[indexes.ledgerIndex] || AP,
+      debtType: values[indexes.debtTypeIndex] || undefined,
+      recoveryDate: values[indexes.recoveryDateIndex] || undefined,
+      originalInvoiceNumber: values[indexes.originalInvoiceNumberIndex] || undefined,
+      originalSettlementDate: values[indexes.originalSettlementDateIndex] || undefined,
+      pillar: schemeValues[indexes.schemePillarIndex],
       invoiceLines: [],
       value: 0
     })
-    item.value += convertToPence(values[6])
+    item.value += convertToPence(values[indexes.valueIndex])
     item.invoiceLines.push({
-      schemeCode: values[4],
-      description: getDescription(values[5]),
-      value: values[6],
-      accountCode: values[9],
-      fundCode: values[15],
-      deliveryBody: values[16],
-      agreementNumber: values[17]
+      schemeCode: values[indexes.schemeCodeIndex],
+      description: getDescription(values[indexes.descriptionIndex]),
+      value: values[indexes.valueIndex],
+      accountCode: values[indexes.accountCodeIndex],
+      fundCode: values[indexes.fundCodeIndex],
+      deliveryBody: values[indexes.deliveryBodyIndex],
+      agreementNumber: values[indexes.agreementNumberIndex]
     })
 
     return x.set(key, item)
