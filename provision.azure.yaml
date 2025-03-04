@@ -1,3 +1,9 @@
 resources:
+  identity: pay-injection
+  postgreSql:
+    name: ffc-pay-injection
   topics:
-    - name: payment
+    - name: ffc-pay-events
+      role: sender
+    - name: ffc-pay-request
+      role: sender
