@@ -36,6 +36,7 @@ container:
   inboundFolder: inbound
   archiveFolder: archive
   quarantineFolder: quarantine
+  processingActive: true
 
 postgresService:
   postgresDb: ffc_pay_injection
