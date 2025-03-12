@@ -7,7 +7,6 @@ const startApp = require('../../app')
 
 describe('app start', () => {
   beforeEach(() => {
-    require('../../app')
     jest.clearAllMocks()
   })
 
