@@ -5,11 +5,13 @@ const dbConfig = require('./database')
 const { DEVELOPMENT, TEST, PRODUCTION } = require('../constants/environments')
 
 const schema = Joi.object({
+  processingActive: Joi.boolean().default(true),
   env: Joi.string().valid(DEVELOPMENT, TEST, PRODUCTION).default(DEVELOPMENT),
   processingInterval: Joi.number().default(10000)
 })
 
 const config = {
+  processingActive: process.env.PROCESSING_ACTIVE,
   env: process.env.NODE_ENV,
   processingInterval: process.env.PROCESSING_INTERVAL
 }
