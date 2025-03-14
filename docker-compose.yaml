@@ -4,6 +4,9 @@ services:
       context: .
       target: production
     image: ffc-pay-injection
+    ports:
+      - "3016:3016"
+      - "9201:9229"
     container_name: ffc-pay-injection
     depends_on:
       - ffc-pay-injection-azurite

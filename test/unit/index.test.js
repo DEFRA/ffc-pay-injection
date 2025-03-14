@@ -1,5 +1,8 @@
 const config = require('../../app/config')
 
+jest.mock('../../app/server')
+const { start: mockStartServer } = require('../../app/server')
+
 jest.mock('../../app/processing')
 const { start: mockStartProcessing } = require('../../app/processing')
 
@@ -8,6 +11,18 @@ const startApp = require('../../app')
 describe('app start', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+  })
+
+  test('starts server when active is true', async () => {
+    config.processingActive = true
+    await startApp()
+    expect(mockStartServer).toHaveBeenCalled()
+  })
+
+  test('start server if active is false', async () => {
+    config.processingActive = false
+    await startApp()
+    expect(mockStartServer).toHaveBeenCalled()
   })
 
   test('starts processing when active is true', async () => {

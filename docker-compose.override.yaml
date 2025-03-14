@@ -8,6 +8,7 @@ services:
     image: ffc-pay-injection-development
     container_name: ffc-pay-injection-development
     ports:
+      - "3016:3016"
       - "9201:9229"
     volumes:
       - ./app:/home/node/app

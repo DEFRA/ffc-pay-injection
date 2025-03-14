@@ -25,6 +25,7 @@ container:
   requestCpu: 10m
   limitMemory: 180Mi
   limitCpu: 120m
+  port: 3016
   messageQueueHost: namespace.servicebus.windows.net
   paymentTopicAddress: ffc-pay-request
   eventsTopicAddress: ffc-pay-events
@@ -37,6 +38,22 @@ container:
   archiveFolder: archive
   quarantineFolder: quarantine
   processingActive: true
+
+readinessProbe:
+  path: /healthy
+  port: 3016
+  initialDelaySeconds: 60
+  periodSeconds: 120
+  failureThreshold: 5
+  timeoutSeconds: 30
+
+livenessProbe:
+  path: /healthz
+  port: 3016
+  initialDelaySeconds: 70
+  periodSeconds: 120
+  failureThreshold: 5
+  timeoutSeconds: 30
 
 postgresService:
   postgresDb: ffc_pay_injection
