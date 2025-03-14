@@ -37,6 +37,7 @@ container:
   archiveFolder: archive
   quarantineFolder: quarantine
   processingActive: true
+  port: 3014
 
 postgresService:
   postgresDb: ffc_pay_injection
@@ -44,6 +45,22 @@ postgresService:
   postgresPort: 5432
   postgresSchema: public
   postgresUser: postgres
+
+readinessProbe:
+  path: /healthy
+  port: 3014
+  initialDelaySeconds: 60
+  periodSeconds: 120
+  failureThreshold: 5
+  timeoutSeconds: 30
+
+livenessProbe:
+  path: /healthz
+  port: 3014
+  initialDelaySeconds: 70
+  periodSeconds: 120
+  failureThreshold: 5
+  timeoutSeconds: 30
 
 workloadIdentity: true
 

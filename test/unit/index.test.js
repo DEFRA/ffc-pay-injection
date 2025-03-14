@@ -3,6 +3,9 @@ const config = require('../../app/config')
 jest.mock('../../app/processing')
 const { start: mockStartProcessing } = require('../../app/processing')
 
+jest.mock('../../app/server')
+const { start: mockStartServer } = require('../../app/server')
+
 const startApp = require('../../app')
 
 describe('app start', () => {
@@ -20,6 +23,18 @@ describe('app start', () => {
     config.processingActive = false
     await startApp()
     expect(mockStartProcessing).toHaveBeenCalledTimes(0)
+  })
+
+  test('starts server when active is true', async () => {
+    config.processingActive = true
+    await startApp()
+    expect(mockStartServer).toHaveBeenCalledTimes(1)
+  })
+
+  test('starts server when active is false', async () => {
+    config.processingActive = false
+    await startApp()
+    expect(mockStartServer).toHaveBeenCalledTimes(1)
   })
 
   test('does not log console.info when active is true', async () => {
