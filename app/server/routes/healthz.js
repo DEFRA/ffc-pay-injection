@@ -1,5 +1,5 @@
 const { OK } = require('../../constants/ok')
-const { OK: statusOK } = require('../../constants/status-codes')
+const { OK: statusOK } = require('../../constants/http-status-codes')
 
 module.exports = {
   method: 'GET',
