@@ -99,8 +99,21 @@ const archiveFile = (filename) => {
   return moveFile(config.inboundFolder, config.archiveFolder, filename)
 }
 
-const quarantineFile = (filename) => {
-  return moveFile(config.inboundFolder, config.quarantineFolder, filename)
+const quarantineFile = (filename, source = 'inbound') => {
+  let sourceFolder
+
+  switch (source) {
+    case 'staging':
+      sourceFolder = config.stagingFolder
+      break
+    case 'inbound':
+      sourceFolder = config.inboundFolder
+      break
+    default:
+      throw new Error(`Invalid source folder "${source}" for quarantineFile`)
+  }
+
+  return moveFile(sourceFolder, config.quarantineFolder, filename)
 }
 
 const deleteFile = async (filename) => {

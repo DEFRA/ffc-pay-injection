@@ -31,7 +31,7 @@ module.exports = {
       })
 
       if (existing) {
-        await quarantineFile(filename)
+        await quarantineFile(filename, 'staging')
 
         return h
           .response({ error: 'Duplicate file detected. File has been quarantined.' })
