@@ -25,6 +25,8 @@ services:
       POSTGRES_SCHEMA_NAME: ${POSTGRES_SCHEMA_NAME:-public}
       POSTGRES_USERNAME: ${POSTGRES_SCHEMA_USERNAME:-postgres}
       PROCESSING_ACTIVE: ${PROCESSING_ACTIVE:-true}
+    networks:
+      - ffc-pay
 
   ffc-pay-injection-postgres:
     image: postgres:11.4-alpine
@@ -32,7 +34,16 @@ services:
       POSTGRES_DB: ffc_pay_injection
       POSTGRES_PASSWORD: ppp
       POSTGRES_USERNAME: postgres
+    networks:
+      - ffc-pay
 
   ffc-pay-injection-azurite:
     image: mcr.microsoft.com/azure-storage/azurite:3.32.0
     command: "azurite-blob --skipApiVersionCheck --loose --blobHost 0.0.0.0"
+    networks:
+      - ffc-pay
+
+networks:
+  ffc-pay:
+    external: true
+    name: ffc-pay
