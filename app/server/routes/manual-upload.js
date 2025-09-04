@@ -1,4 +1,10 @@
-const { SUCCESS, BAD_REQUEST, INTERNAL_SERVER_ERROR, CONFLICT } = require('../../constants/status-codes')
+const {
+  SUCCESS,
+  BAD_REQUEST,
+  INTERNAL_SERVER_ERROR,
+  CONFLICT
+} = require('../../constants/status-codes')
+
 const db = require('../../data')
 const { getFileChecksum, acceptFile, quarantineFile } = require('../../storage')
 
@@ -15,7 +21,14 @@ module.exports = {
     const { uploader, filename } = request.payload
 
     if (!uploader || !filename) {
-      return h.response({ error: 'username and filename are required' }).code(BAD_REQUEST)
+      return h
+        .response({
+          error: 'Missing required information',
+          message:
+            'Both your username and the file name must be provided before the upload can continue. Please check your input and try again.',
+          code: 'MISSING_FIELDS'
+        })
+        .code(BAD_REQUEST)
     }
 
     try {
@@ -23,10 +36,7 @@ module.exports = {
 
       const existing = await db.manualUpload.findOne({
         where: {
-          [db.Sequelize.Op.or]: [
-            { filename },
-            { checksum }
-          ]
+          [db.Sequelize.Op.or]: [{ filename }, { checksum }]
         }
       })
 
@@ -34,7 +44,11 @@ module.exports = {
         await quarantineFile(filename, 'staging')
 
         return h
-          .response({ error: 'Duplicate file detected. File has been quarantined.' })
+          .response({
+            error: 'Duplicate upload detected',
+            message: `The file "${filename}" has already been uploaded. To prevent accidental reprocessing, it has been moved to the quarantine area. Please ensure you are uploading the correct and most recent file.`,
+            code: 'DUPLICATE_UPLOAD'
+          })
           .code(CONFLICT)
       }
 
@@ -47,10 +61,23 @@ module.exports = {
         checksum
       })
 
-      return h.response({ message: 'Manual upload staged successfully.' }).code(SUCCESS)
+      return h
+        .response({
+          message: 'Manual upload staged successfully.',
+          code: 'UPLOAD_SUCCESS'
+        })
+        .code(SUCCESS)
     } catch (err) {
       console.error('Manual upload error:', err)
-      return h.response({ error: `Failed to process manual upload. ${err.message}` }).code(INTERNAL_SERVER_ERROR)
+
+      return h
+        .response({
+          error: 'Failed to process manual upload',
+          message:
+            'An unexpected problem occurred while processing your file. Please try again later or contact support if the issue persists.',
+          code: 'UPLOAD_ERROR'
+        })
+        .code(INTERNAL_SERVER_ERROR)
     }
   }
 }
