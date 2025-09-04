@@ -5,11 +5,13 @@ const {
   CONFLICT
 } = require('../../constants/status-codes')
 
+const { POST } = require('../../constants/methods')
+
 const db = require('../../data')
 const { getFileChecksum, acceptFile, quarantineFile } = require('../../storage')
 
 module.exports = {
-  method: 'POST',
+  method: POST,
   path: '/manual-upload',
   options: {
     payload: {

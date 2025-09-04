@@ -1,19 +1,37 @@
-describe('BlobServiceClient initialization', () => {
-  let consoleLogSpy
-  let config
-  let BlobServiceClient
-  let DefaultAzureCredential
+const { NOT_FOUND } = require('../../app/constants/status-codes')
 
+let storage
+let config
+let mockContainerClient
+let mockBlobClient
+
+describe('storage module', () => {
   beforeAll(() => {
     jest.doMock('@azure/storage-blob', () => {
-      const getContainerClientMock = jest.fn()
-      const fromConnectionStringMock = jest.fn().mockReturnValue({
-        getContainerClient: getContainerClientMock
-      })
+      mockBlobClient = {
+        upload: jest.fn(),
+        downloadToBuffer: jest.fn(),
+        getProperties: jest.fn(),
+        beginCopyFromURL: jest.fn(),
+        pollUntilDone: jest.fn(),
+        delete: jest.fn(),
+        url: 'http://fake-url/blob'
+      }
+
+      mockContainerClient = {
+        createIfNotExists: jest.fn(),
+        getBlockBlobClient: jest.fn().mockReturnValue(mockBlobClient),
+        listBlobsFlat: jest.fn()
+      }
+
       const BlobServiceClientMock = jest.fn().mockImplementation(() => ({
-        getContainerClient: getContainerClientMock
+        getContainerClient: jest.fn().mockReturnValue(mockContainerClient)
       }))
-      BlobServiceClientMock.fromConnectionString = fromConnectionStringMock
+
+      BlobServiceClientMock.fromConnectionString = jest.fn().mockReturnValue({
+        getContainerClient: jest.fn().mockReturnValue(mockContainerClient)
+      })
+
       return { BlobServiceClient: BlobServiceClientMock }
     })
 
@@ -23,49 +41,108 @@ describe('BlobServiceClient initialization', () => {
         options
       }))
     }))
+
+    jest.doMock('../../app/utils/create-hash', () => jest.fn().mockReturnValue('fakehash'))
   })
 
   beforeEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
 
-    config = require('../../app/config/storage')
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    ({ BlobServiceClient } = require('@azure/storage-blob'));
-    ({ DefaultAzureCredential } = require('@azure/identity'))
+    config = require('../../app/config').storageConfig
+    storage = require('../../app/storage')
+
+    // ensure listBlobsFlat is always async iterable
+    mockContainerClient.listBlobsFlat.mockImplementation(async function * () {
+      yield * []
+    })
   })
 
-  afterEach(() => {
-    consoleLogSpy.mockRestore()
-    jest.clearAllMocks()
+  test('initialiseContainers creates containers if configured', async () => {
+    config.createContainers = true
+    await storage.getInboundFileList() // triggers initialiseContainers lazily
+    expect(mockContainerClient.createIfNotExists).toHaveBeenCalled()
   })
 
-  test('should use connection string when config.useConnectionStr is true', () => {
-    config.useConnectionStr = true
-    config.connectionStr = 'fake-connection-string'
+  test('initialiseFolders uploads placeholder file to all folders', async () => {
+    config.createContainers = false
+    config.inboundFolder = 'inbound'
+    config.archiveFolder = 'archive'
+    config.quarantineFolder = 'quarantine'
+    config.returnFolder = 'return'
+    config.stagingFolder = 'staging'
 
-    require('../../app/storage')
-
-    expect(consoleLogSpy).toHaveBeenCalledWith('Using connection string for BlobServiceClient')
-    expect(BlobServiceClient.fromConnectionString).toHaveBeenCalledWith(config.connectionStr)
+    await storage.getInboundFileList()
+    expect(mockContainerClient.getBlockBlobClient).toHaveBeenCalledWith('inbound/default.txt')
+    expect(mockBlobClient.upload).toHaveBeenCalledWith('Placeholder', 'Placeholder'.length)
   })
 
-  test('should use DefaultAzureCredential when config.useConnectionStr is false', () => {
-    config.useConnectionStr = false
-    config.storageAccount = 'fakeaccount'
-    config.managedIdentityClientId = 'fake-managed-id'
+  test('getInboundFileList returns filenames without folder prefix', async () => {
+    config.inboundFolder = 'inbound'
+    const files = [{ name: 'inbound/file1.txt' }, { name: 'inbound/file2.csv' }]
+    mockContainerClient.listBlobsFlat.mockImplementation(async function * () {
+      yield * files
+    })
 
-    require('../../app/storage')
+    const result = await storage.getInboundFileList()
+    expect(result).toEqual(['file1.txt', 'file2.csv'])
+  })
 
-    const expectedUri = `https://${config.storageAccount}.blob.core.windows.net`
+  test('downloadFile downloads file as string', async () => {
+    mockBlobClient.downloadToBuffer.mockResolvedValue(Buffer.from('test-content'))
+    const result = await storage.downloadFile('file1.txt')
+    expect(result).toBe('test-content')
+  })
 
-    expect(consoleLogSpy).toHaveBeenCalledWith('Using DefaultAzureCredential for BlobServiceClient')
-    expect(DefaultAzureCredential).toHaveBeenCalledWith({ managedIdentityClientId: config.managedIdentityClientId })
-    expect(BlobServiceClient).toHaveBeenCalledWith(expectedUri,
-      expect.objectContaining({
-        type: 'DefaultAzureCredential',
-        options: { managedIdentityClientId: config.managedIdentityClientId }
-      })
-    )
+  test('getFileChecksum throws if blob not found', async () => {
+    mockBlobClient.getProperties.mockRejectedValue({ statusCode: NOT_FOUND })
+    mockBlobClient.downloadToBuffer.mockResolvedValue(Buffer.from('ignored'))
+
+    await expect(storage.getFileChecksum('missing.txt'))
+      .rejects.toThrow("File 'missing.txt' does not exist in folder 'staging'")
+  })
+
+  test('moveFile copies and deletes on success', async () => {
+    mockBlobClient.beginCopyFromURL.mockResolvedValue({
+      pollUntilDone: jest.fn().mockResolvedValue({ copyStatus: 'success' })
+    })
+
+    await storage.acceptFile('file1.txt')
+    expect(mockBlobClient.delete).toHaveBeenCalled()
+  })
+
+  test('moveFile throws if copy status failed', async () => {
+    mockBlobClient.beginCopyFromURL.mockResolvedValue({
+      pollUntilDone: jest.fn().mockResolvedValue({ copyStatus: 'failed' })
+    })
+
+    await expect(storage.acceptFile('badfile.txt'))
+      .rejects.toThrow('Copy failed with status: failed')
+  })
+
+  test('quarantineFile throws on invalid source', () => {
+    expect(() => storage.quarantineFile('file.txt', 'invalid'))
+      .toThrow('Invalid source folder "invalid" for quarantineFile')
+  })
+
+  test('deleteFile calls delete on inbound blob', async () => {
+    await storage.deleteFile('deleteme.txt')
+    expect(mockBlobClient.delete).toHaveBeenCalled()
+  })
+
+  test('getReturnBlobClient delegates to getBlob', async () => {
+    const result = await storage.getReturnBlobClient('returnme.txt')
+    expect(result).toBe(mockBlobClient)
+  })
+
+  test('getFileChecksum downloads buffer and hashes it', async () => {
+    const createHash = require('../../app/utils/create-hash')
+    mockBlobClient.getProperties.mockResolvedValue({})
+    mockBlobClient.downloadToBuffer.mockResolvedValue(Buffer.from('abc'))
+
+    const result = await storage.getFileChecksum('somefile.txt')
+
+    expect(createHash).toHaveBeenCalledWith(Buffer.from('abc'))
+    expect(result).toBe('fakehash')
   })
 })
