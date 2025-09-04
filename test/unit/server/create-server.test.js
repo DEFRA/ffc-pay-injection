@@ -1,6 +1,4 @@
-jest.mock('../../../app/config', () => ({
-  serverConfig: { isDev: true }
-}))
+jest.mock('../../../app/config')
 
 const Hapi = require('@hapi/hapi')
 const { createServer } = require('../../../app/server/create-server')

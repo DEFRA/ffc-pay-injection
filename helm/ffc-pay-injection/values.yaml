@@ -33,6 +33,7 @@ container:
   azureStorageUseConnectionString: false  
   azureStorageCreateContainers: false
   storageContainer: manual
+  stagingFolder: staging
   inboundFolder: inbound
   archiveFolder: archive
   quarantineFolder: quarantine
