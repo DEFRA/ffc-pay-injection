@@ -21,10 +21,6 @@ services:
   ffc-pay-injection-postgres:
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      
-networks:
-  ffc-pay:
-    driver: bridge
 
 volumes:
   postgres_data:
