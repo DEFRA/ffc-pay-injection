@@ -1,3 +1,4 @@
 module.exports = {
-  GET: 'GET'
+  GET: 'GET',
+  POST: 'POST'
 }
