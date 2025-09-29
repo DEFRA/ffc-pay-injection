@@ -10,7 +10,12 @@ const outputDateFormat = 'YYYY-MM-DD'
 const acceptedDateFormats = ['DD/MM/YYYY', outputDateFormat, 'DD-MM-YYYY']
 
 const parsePaymentFile = async (data, filename, transaction) => {
+  if (!data?.trim()) {
+    throw new Error('No data found in payment file')
+  }
+
   const csv = data.trim().replace(/(['"])/g, '').split(/\r?\n/)
+
   const paymentRequests = getPaymentRequests(csv)
 
   for (const paymentRequest of paymentRequests) {
