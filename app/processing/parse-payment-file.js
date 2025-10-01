@@ -14,7 +14,7 @@ const parsePaymentFile = async (data, filename, transaction) => {
     throw new Error('No data found in payment file')
   }
 
-  const csv = data.trim().replace(/(['"])/g, '').split(/\r?\n/)
+  const csv = data.trim().replaceAll(/(['"])/g, '').split(/\r?\n/)
 
   const paymentRequests = getPaymentRequests(csv)
 
