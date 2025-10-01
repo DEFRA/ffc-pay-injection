@@ -17,6 +17,26 @@ const { processPaymentFile } = require('../../../app/processing/process-payment-
 
 const filename = 'FFCS_Manual_Batch_20230913140000.csv'
 
+describe('process payment file with no data', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  test('throws error if data is empty', async () => {
+    const { parsePaymentFile } = jest.requireActual('../../../app/processing/parse-payment-file')
+    await expect(parsePaymentFile('', filename, {}))
+      .rejects
+      .toThrow('No data found in payment file')
+  })
+
+  test('throws error if data is null', async () => {
+    const { parsePaymentFile } = jest.requireActual('../../../app/processing/parse-payment-file')
+    await expect(parsePaymentFile(null, filename, {}))
+      .rejects
+      .toThrow('No data found in payment file')
+  })
+})
+
 describe('process payment file', () => {
   beforeEach(async () => {
     jest.clearAllMocks()
