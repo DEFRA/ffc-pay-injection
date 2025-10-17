@@ -12,7 +12,9 @@ const {
   IMPS,
   SFI23,
   DELINKED,
-  SFI_EXPANDED
+  SFI_EXPANDED,
+  COHT_REVENUE,
+  COHT_CAPITAL
 } = require('../../../app/constants/schemes')
 
 const {
@@ -29,7 +31,9 @@ const {
   IMPS: IMPS_NAME,
   SFI23: SFI23_NAME,
   DELINKED: DELINKED_NAME,
-  SFI_EXPANDED: SFI_EXPANDED_NAME
+  SFI_EXPANDED: SFI_EXPANDED_NAME,
+  COHT_REVENUE: COHT_REVENUE_NAME,
+  COHT_CAPITAL: COHT_CAPITAL_NAME
 } = require('../../../app/constants/schemes-names')
 
 const { getSchemeId } = require('../../../app/processing/get-scheme-id')
@@ -173,6 +177,26 @@ describe('get scheme id', () => {
   test('should return SFI Expanded if SFI Expanded scheme name', () => {
     const result = getSchemeId(SFI_EXPANDED_NAME)
     expect(result).toBe(SFI_EXPANDED)
+  })
+
+  test('should return COHT_REVENUE if COHT_REVENUE scheme Id', () => {
+    const result = getSchemeId(COHT_REVENUE)
+    expect(result).toBe(COHT_REVENUE)
+  })
+
+  test('should return COHT_REVENUE if COHT_REVENUE scheme name', () => {
+    const result = getSchemeId(COHT_REVENUE_NAME)
+    expect(result).toBe(COHT_REVENUE)
+  })
+
+  test('should return COHT_CAPITAL if COHT_CAPITAL scheme Id', () => {
+    const result = getSchemeId(COHT_CAPITAL)
+    expect(result).toBe(COHT_CAPITAL)
+  })
+
+  test('should return COHT_CAPITAL if COHT_CAPITAL scheme name', () => {
+    const result = getSchemeId(COHT_CAPITAL_NAME)
+    expect(result).toBe(COHT_CAPITAL)
   })
 
   test('should throw error if scheme Id not recognised', () => {
