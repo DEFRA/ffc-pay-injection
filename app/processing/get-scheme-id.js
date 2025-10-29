@@ -12,7 +12,9 @@ const {
   IMPS,
   SFI23,
   DELINKED,
-  SFI_EXPANDED
+  SFI_EXPANDED,
+  COHT_REVENUE,
+  COHT_CAPITAL
 } = require('../constants/schemes')
 
 const {
@@ -29,56 +31,71 @@ const {
   IMPS: IMPS_NAME,
   SFI23: SFI23_NAME,
   DELINKED: DELINKED_NAME,
-  SFI_EXPANDED: SFI_EXPANDED_NAME
+  SFI_EXPANDED: SFI_EXPANDED_NAME,
+  COHT_REVENUE: COHT_REVENUE_NAME,
+  COHT_CAPITAL: COHT_CAPITAL_NAME
 } = require('../constants/schemes-names')
 
+const mapSchemeNames = {
+  [SFI_NAME.toLowerCase()]: SFI,
+  [SFIP_NAME.toLowerCase()]: SFIP,
+  [LSES_NAME.toLowerCase()]: LumpSums,
+  [AHWR_NAME.toLowerCase()]: VetVisits,
+  [CS_NAME.toLowerCase()]: CS,
+  [BPS_NAME.toLowerCase()]: BPS,
+  [FDMR_NAME.toLowerCase()]: FDMR,
+  [MANUAL_NAME.toLowerCase()]: MANUAL,
+  [ES_NAME.toLowerCase()]: ES,
+  [FC_NAME.toLowerCase()]: FC,
+  [IMPS_NAME.toLowerCase()]: IMPS,
+  [SFI23_NAME.toLowerCase()]: SFI23,
+  [DELINKED_NAME.toLowerCase()]: DELINKED,
+  [SFI_EXPANDED_NAME.toLowerCase()]: SFI_EXPANDED,
+  [COHT_REVENUE_NAME.toLowerCase()]: COHT_REVENUE,
+  [COHT_CAPITAL_NAME.toLowerCase()]: COHT_CAPITAL
+}
+
+const idMap = Object.fromEntries(
+  Object.values({
+    SFI,
+    SFIP,
+    LumpSums,
+    VetVisits,
+    CS,
+    BPS,
+    FDMR,
+    MANUAL,
+    ES,
+    FC,
+    IMPS,
+    SFI23,
+    DELINKED,
+    SFI_EXPANDED,
+    COHT_REVENUE,
+    COHT_CAPITAL
+  })
+    .filter(val => val != null)
+    .map(val => [val.toString(), val])
+)
+
 const getSchemeId = (scheme) => {
-  switch (scheme.toString().toLowerCase()) {
-    case SFI.toString():
-    case SFI_NAME.toLowerCase():
-      return SFI
-    case SFIP.toString():
-    case SFIP_NAME.toLowerCase():
-      return SFIP
-    case LumpSums.toString():
-    case LSES_NAME.toLowerCase():
-      return LumpSums
-    case VetVisits.toString():
-    case AHWR_NAME.toLowerCase():
-      return VetVisits
-    case CS.toString():
-    case CS_NAME.toLowerCase():
-      return CS
-    case BPS.toString():
-    case BPS_NAME.toLowerCase():
-      return BPS
-    case FDMR.toString():
-    case FDMR_NAME.toLowerCase():
-      return FDMR
-    case MANUAL.toString():
-    case MANUAL_NAME.toLowerCase():
-      return MANUAL
-    case ES.toString():
-    case ES_NAME.toLowerCase():
-      return ES
-    case FC.toString():
-    case FC_NAME.toLowerCase():
-      return FC
-    case IMPS.toString():
-    case IMPS_NAME.toLowerCase():
-      return IMPS
-    case SFI23.toString():
-    case SFI23_NAME.toLowerCase():
-      return SFI23
-    case DELINKED.toString():
-    case DELINKED_NAME.toLowerCase():
-      return DELINKED
-    case SFI_EXPANDED.toString():
-    case SFI_EXPANDED_NAME.toLowerCase():
-      return SFI_EXPANDED
-    default:
-      throw new Error(`Scheme ${scheme} is not recognised`)
+  if (scheme == null) {
+    throw new Error(`Scheme ${scheme} is not recognised`)
   }
+
+  const raw = scheme.toString().trim()
+
+  if (idMap?.[raw]) {
+    return idMap[raw]
+  }
+
+  const lower = raw.toLowerCase()
+
+  if (mapSchemeNames?.[lower]) {
+    return mapSchemeNames[lower]
+  }
+
+  throw new Error(`Scheme ${scheme} is not recognised`)
 }
 
 module.exports = {
