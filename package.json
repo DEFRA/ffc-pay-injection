@@ -29,6 +29,7 @@
     "ffc-messaging": "2.10.1",
     "ffc-pay-event-publisher": "1.2.0",
     "hapi-pino": "13.0.0",
+    "joi": "18.0.1",
     "log-timestamp": "0.3.0",
     "moment": "2.29.4",
     "pg": "8.11.3",
