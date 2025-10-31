@@ -15,7 +15,9 @@ const timestamp = String.raw`(?:${timestamp14}|${timestamp12})`
 const filenameRegex = new RegExp(String.raw`^${prefix}${schemePart}${timestamp}\.csv$`, 'i')
 
 const isPaymentFile = (filename) => {
-  if (typeof filename !== 'string') return false
+  if (typeof filename !== 'string') {
+    return false
+  }
   return filenameRegex.test(filename.trim())
 }
 
