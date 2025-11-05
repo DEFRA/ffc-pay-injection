@@ -41,7 +41,7 @@ const { GBP } = require('../../app/constants/currency')
 const { MANUAL } = require('../../app/constants/schemes')
 const { AP, AR } = require('../../app/constants/ledgers')
 
-const filename = 'FFC_Manual_Batch_20201001.csv'
+const filename = 'FFC_Manual_Batch_202510011200.csv'
 const minimalFilepath = path.resolve(__dirname, '../files', 'minimal.csv')
 const multiLineFilepath = path.resolve(__dirname, '../files', 'multi-line.csv')
 const multiPaymentFilepath = path.resolve(__dirname, '../files', 'multi-payment.csv')

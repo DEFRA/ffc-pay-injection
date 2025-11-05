@@ -14,6 +14,7 @@ module.exports = {
   method: POST,
   path: '/manual-upload',
   options: {
+    description: 'Create a manual upload log',
     payload: {
       parse: true,
       allow: 'application/json'
