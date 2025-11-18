@@ -80,7 +80,7 @@ describe('processPaymentFile', () => {
     }
 
     await run()
-    
+
     if (shouldSend) {
       expect(sendPaymentMessages).toHaveBeenCalled()
     } else {
