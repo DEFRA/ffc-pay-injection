@@ -1,57 +1,37 @@
 const mockSendBatchMessages = jest.fn()
 const mockCloseConnection = jest.fn()
-const MockMessageBatchSender = jest.fn().mockImplementation(() => {
-  return {
-    sendBatchMessages: mockSendBatchMessages,
-    closeConnection: mockCloseConnection
-  }
-})
+const MockMessageBatchSender = jest.fn(() => ({
+  sendBatchMessages: mockSendBatchMessages,
+  closeConnection: mockCloseConnection
+}))
 
-jest.mock('ffc-messaging', () => {
-  return {
-    MessageBatchSender: MockMessageBatchSender
-  }
-})
+jest.mock('ffc-messaging', () => ({
+  MessageBatchSender: MockMessageBatchSender
+}))
 
 jest.mock('../../../app/messaging/create-message')
 const { createMessage: mockCreateMessage } = require('../../../app/messaging/create-message')
-
 const config = require('../../../app/config')
-
 const { sendPaymentMessages } = require('../../../app/messaging/send-payment-message')
 
-const paymentRequest = {
-  schemeId: 1
-}
+const paymentRequest = { schemeId: 1 }
+const message = { body: paymentRequest }
 
-const message = {
-  body: paymentRequest
-}
-
-describe('send message', () => {
+describe('sendPaymentMessages', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-
     mockCreateMessage.mockReturnValue(message)
   })
 
-  test('should create message from payment request and type', async () => {
-    await sendPaymentMessages([paymentRequest])
-    expect(mockCreateMessage).toHaveBeenCalledWith(paymentRequest)
-  })
+  const run = () => sendPaymentMessages([paymentRequest])
 
-  test('should create new message sender', async () => {
-    await sendPaymentMessages([paymentRequest])
-    expect(MockMessageBatchSender).toHaveBeenCalledWith(config.paymentTopic)
-  })
-
-  test('should send created messages', async () => {
-    await sendPaymentMessages([paymentRequest])
-    expect(mockSendBatchMessages).toHaveBeenCalledWith([message])
-  })
-
-  test('should close connection after sending', async () => {
-    await sendPaymentMessages([paymentRequest])
-    expect(mockCloseConnection).toHaveBeenCalled()
+  test.each([
+    ['creates message from payment request', () => expect(mockCreateMessage).toHaveBeenCalledWith(paymentRequest)],
+    ['creates new message sender', () => expect(MockMessageBatchSender).toHaveBeenCalledWith(config.paymentTopic)],
+    ['sends created messages', () => expect(mockSendBatchMessages).toHaveBeenCalledWith([message])],
+    ['closes connection after sending', () => expect(mockCloseConnection).toHaveBeenCalled()]
+  ])('%s', async (_, assertion) => {
+    await run()
+    assertion()
   })
 })
