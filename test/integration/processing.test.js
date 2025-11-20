@@ -100,7 +100,11 @@ describe('process files', () => {
     await start()
 
     const allFiles = []
-    for await (const item of container.listBlobsFlat()) allFiles.push(item.name)
+    
+    for await (const item of container.listBlobsFlat()) {
+      allFiles.push(item.name)
+    }
+
     expect(allFiles).toContain(`${storageConfig.inbound}/ignore me.dat`)
   })
 
