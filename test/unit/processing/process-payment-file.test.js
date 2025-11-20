@@ -75,8 +75,12 @@ describe('processPaymentFile', () => {
     ['sends messages on success', true],
     ['does not send messages on parse error', false]
   ])('%s', async (_, shouldSend) => {
-    if (!shouldSend) parsePaymentFile.mockImplementation(() => { throw new Error('Parse error') })
+    if (!shouldSend) {
+      parsePaymentFile.mockImplementation(() => { throw new Error('Parse error') })
+    }
+
     await run()
+    
     if (shouldSend) {
       expect(sendPaymentMessages).toHaveBeenCalled()
     } else {
