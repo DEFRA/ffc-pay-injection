@@ -14,12 +14,18 @@ const processPaymentFile = async (filename, transaction) => {
     paymentRequests = await parsePaymentFile(data, filename, transaction)
   } catch (err) {
     await quarantineFile(filename, err)
+    return
   }
+
   if (paymentRequests?.length) {
-    await sendPaymentMessages(paymentRequests)
-    console.log('Payments published:', util.inspect(paymentRequests, false, null, true))
-    await archiveFile(filename)
-    await sendSuccessEvent(filename)
+    try {
+      await sendPaymentMessages(paymentRequests)
+      console.log('Payments published:', util.inspect(paymentRequests, false, null, true))
+      await sendSuccessEvent(filename)
+      await archiveFile(filename)
+    } catch (err) {
+      await quarantineFile(filename, err)
+    }
   }
 }
 
