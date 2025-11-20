@@ -134,4 +134,46 @@ describe('processPaymentFile', () => {
     await processPaymentFile(filename)
     expect(sendSuccessEvent).not.toHaveBeenCalled()
   })
+
+  test('should quarantine file if sendPaymentMessages fails', async () => {
+    sendPaymentMessages.mockImplementation(() => {
+      throw new Error('Messaging error')
+    })
+    await processPaymentFile(filename)
+    expect(quarantineFile).toHaveBeenCalledWith(filename, new Error('Messaging error'))
+  })
+
+  test('should not archive file if sendPaymentMessages fails', async () => {
+    sendPaymentMessages.mockImplementation(() => {
+      throw new Error('Messaging error')
+    })
+    await processPaymentFile(filename)
+    expect(archiveFile).not.toHaveBeenCalled()
+  })
+
+  test('should not send success event if sendPaymentMessages fails', async () => {
+    sendPaymentMessages.mockImplementation(() => {
+      throw new Error('Messaging error')
+    })
+    await processPaymentFile(filename)
+    expect(sendSuccessEvent).not.toHaveBeenCalled()
+  })
+
+  test('should not send messages if paymentRequests is empty', async () => {
+    parsePaymentFile.mockResolvedValue([])
+    await processPaymentFile(filename)
+    expect(sendPaymentMessages).not.toHaveBeenCalled()
+  })
+
+  test('should not archive file if paymentRequests is empty', async () => {
+    parsePaymentFile.mockResolvedValue([])
+    await processPaymentFile(filename)
+    expect(archiveFile).not.toHaveBeenCalled()
+  })
+
+  test('should not send success event if paymentRequests is empty', async () => {
+    parsePaymentFile.mockResolvedValue([])
+    await processPaymentFile(filename)
+    expect(sendSuccessEvent).not.toHaveBeenCalled()
+  })
 })
