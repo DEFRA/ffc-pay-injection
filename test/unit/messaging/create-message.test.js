@@ -1,25 +1,17 @@
 const { SOURCE } = require('../../../app/constants/source')
 const { PAYMENT } = require('../../../app/constants/messages')
-
 const { createMessage } = require('../../../app/messaging/create-message')
 
-const paymentRequest = {
-  schemeId: 1
-}
+const paymentRequest = { schemeId: 1 }
 
-describe('create message', () => {
-  test('should create a message with the supplied body', () => {
-    const message = createMessage(paymentRequest)
-    expect(message.body).toEqual(paymentRequest)
-  })
+describe('createMessage', () => {
+  const message = createMessage(paymentRequest)
 
-  test('should create a message with the supplied type', () => {
-    const message = createMessage(paymentRequest)
-    expect(message.type).toEqual(PAYMENT)
-  })
-
-  test('should create a message with source', () => {
-    const message = createMessage(paymentRequest)
-    expect(message.source).toEqual(SOURCE)
+  test.each([
+    ['body', paymentRequest, msg => msg.body],
+    ['type', PAYMENT, msg => msg.type],
+    ['source', SOURCE, msg => msg.source]
+  ])('sets %s correctly', (_, expected, extractor) => {
+    expect(extractor(message)).toEqual(expected)
   })
 })
