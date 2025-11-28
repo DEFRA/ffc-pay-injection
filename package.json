@@ -1,6 +1,6 @@
 {
   "name": "ffc-pay-injection",
-  "version": "1.2.16",
+  "version": "1.2.17",
   "description": "Inject payments",
   "homepage": "https://github.com/DEFRA/ffc-pay-injection",
   "main": "app/index.js",
