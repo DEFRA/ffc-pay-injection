@@ -11,7 +11,7 @@
       <![CDATA[
         UPDATE "manualUploads"
         SET success = CASE
-          WHEN filename = 'FFC_Manual_Batch_SFI_2025_10_24(FFC_Manual_Batch_SFI_20251024)%20(1).csv' THEN FALSE
+          WHEN filename = 'FFC_Manual_Batch_SFI_2025_10_24(FFC_Manual_Batch_SFI_20251024) (1).csv' THEN FALSE
           ELSE TRUE
         END;
       ]]>
