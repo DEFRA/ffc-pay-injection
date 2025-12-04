@@ -4,7 +4,8 @@ module.exports = (sequelize, DataTypes) => {
     filename: DataTypes.STRING,
     uploader: DataTypes.STRING,
     timeStamp: DataTypes.DATE,
-    checksum: DataTypes.STRING
+    checksum: DataTypes.STRING,
+    success: DataTypes.BOOLEAN
   },
   {
     tableName: 'manualUploads',

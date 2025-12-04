@@ -4,6 +4,7 @@ const { parsePaymentFile } = require('./parse-payment-file')
 const { quarantineFile } = require('./quarantine-file')
 const { sendPaymentMessages } = require('../messaging')
 const { sendSuccessEvent } = require('../event')
+const { updateSuccess } = require('./update-success')
 
 const processPaymentFile = async (filename, transaction) => {
   console.info(`Processing payment file: ${filename}`)
@@ -13,6 +14,7 @@ const processPaymentFile = async (filename, transaction) => {
   try {
     paymentRequests = await parsePaymentFile(data, filename, transaction)
   } catch (err) {
+    await updateSuccess(filename, false, transaction)
     await quarantineFile(filename, err)
     return
   }
@@ -21,9 +23,11 @@ const processPaymentFile = async (filename, transaction) => {
     try {
       await sendPaymentMessages(paymentRequests)
       console.log('Payments published:', util.inspect(paymentRequests, false, null, true))
-      await sendSuccessEvent(filename)
+      await updateSuccess(filename, true, transaction)
       await archiveFile(filename)
+      await sendSuccessEvent(filename)
     } catch (err) {
+      await updateSuccess(filename, false, transaction)
       await quarantineFile(filename, err)
     }
   }

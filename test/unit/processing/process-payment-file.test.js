@@ -3,12 +3,14 @@ jest.mock('../../../app/processing/parse-payment-file')
 jest.mock('../../../app/processing/quarantine-file')
 jest.mock('../../../app/messaging')
 jest.mock('../../../app/event')
+jest.mock('../../../app/processing/update-success')
 
 const { downloadFile, archiveFile } = require('../../../app/storage')
 const { parsePaymentFile } = require('../../../app/processing/parse-payment-file')
 const { quarantineFile } = require('../../../app/processing/quarantine-file')
 const { sendPaymentMessages } = require('../../../app/messaging')
 const { sendSuccessEvent } = require('../../../app/event')
+const { updateSuccess } = require('../../../app/processing/update-success')
 const { processPaymentFile } = require('../../../app/processing/process-payment-file')
 
 const filename = 'FFCS_Manual_Batch_20230913140000.csv'
@@ -134,46 +136,79 @@ describe('processPaymentFile', () => {
     await processPaymentFile(filename)
     expect(sendSuccessEvent).not.toHaveBeenCalled()
   })
+})
 
-  test('should quarantine file if sendPaymentMessages fails', async () => {
-    sendPaymentMessages.mockImplementation(() => {
-      throw new Error('Messaging error')
-    })
-    await processPaymentFile(filename)
-    expect(quarantineFile).toHaveBeenCalledWith(filename, new Error('Messaging error'))
+describe('processPaymentFile additional coverage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    parsePaymentFile.mockResolvedValue([{ schemeId: 1 }])
+    updateSuccess.mockResolvedValue()
+    quarantineFile.mockResolvedValue()
+    archiveFile.mockResolvedValue()
+    sendSuccessEvent.mockResolvedValue()
+    sendPaymentMessages.mockResolvedValue()
+    downloadFile.mockResolvedValue('file data')
   })
 
-  test('should not archive file if sendPaymentMessages fails', async () => {
-    sendPaymentMessages.mockImplementation(() => {
-      throw new Error('Messaging error')
-    })
+  test('calls updateSuccess with false and quarantines if parsePaymentFile throws', async () => {
+    const error = new Error('Parse error')
+    parsePaymentFile.mockRejectedValue(error)
+
     await processPaymentFile(filename)
+
+    expect(updateSuccess).toHaveBeenCalledWith(filename, false, undefined)
+    expect(quarantineFile).toHaveBeenCalledWith(filename, error)
+  })
+
+  test('calls updateSuccess with true on success', async () => {
+    await processPaymentFile(filename)
+
+    expect(updateSuccess).toHaveBeenCalledWith(filename, true, undefined)
+  })
+
+  test('calls updateSuccess with false and quarantines if sendPaymentMessages throws', async () => {
+    const error = new Error('Messaging error')
+    sendPaymentMessages.mockRejectedValue(error)
+
+    await processPaymentFile(filename)
+
+    expect(updateSuccess).toHaveBeenCalledWith(filename, false, undefined)
+    expect(quarantineFile).toHaveBeenCalledWith(filename, error)
+  })
+
+  test('throws if downloadFile fails', async () => {
+    const error = new Error('Download failed')
+    downloadFile.mockRejectedValue(error)
+
+    await expect(processPaymentFile(filename)).rejects.toThrow(error)
+
+    expect(parsePaymentFile).not.toHaveBeenCalled()
+    expect(updateSuccess).not.toHaveBeenCalled()
+    expect(quarantineFile).not.toHaveBeenCalled()
+  })
+
+  test('does not call archiveFile or sendSuccessEvent if paymentRequests is empty', async () => {
+    parsePaymentFile.mockResolvedValue([])
+
+    await processPaymentFile(filename)
+
     expect(archiveFile).not.toHaveBeenCalled()
-  })
-
-  test('should not send success event if sendPaymentMessages fails', async () => {
-    sendPaymentMessages.mockImplementation(() => {
-      throw new Error('Messaging error')
-    })
-    await processPaymentFile(filename)
     expect(sendSuccessEvent).not.toHaveBeenCalled()
   })
 
-  test('should not send messages if paymentRequests is empty', async () => {
-    parsePaymentFile.mockResolvedValue([])
-    await processPaymentFile(filename)
-    expect(sendPaymentMessages).not.toHaveBeenCalled()
-  })
+  test('logs info and log messages', async () => {
+    const infoSpy = jest.spyOn(console, 'info').mockImplementation(() => { })
+    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => { })
 
-  test('should not archive file if paymentRequests is empty', async () => {
-    parsePaymentFile.mockResolvedValue([])
     await processPaymentFile(filename)
-    expect(archiveFile).not.toHaveBeenCalled()
-  })
 
-  test('should not send success event if paymentRequests is empty', async () => {
-    parsePaymentFile.mockResolvedValue([])
-    await processPaymentFile(filename)
-    expect(sendSuccessEvent).not.toHaveBeenCalled()
+    expect(infoSpy).toHaveBeenCalledWith(`Processing payment file: ${filename}`)
+    expect(logSpy).toHaveBeenCalledWith(
+      'Payments published:',
+      expect.stringContaining('schemeId')
+    )
+
+    infoSpy.mockRestore()
+    logSpy.mockRestore()
   })
 })

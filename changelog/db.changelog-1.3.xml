@@ -1,0 +1,20 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.9.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd">
+  <changeSet author="Sam Plackett" id="2">
+    <tagDatabase tag="v1.3.0" />
+  </changeSet>
+  <changeSet author="Sam Plackett" id="3">
+    <preConditions onFail="MARK_RAN" onError="MARK_RAN">
+      <columnExists tableName="manualUploads" columnName="success"/>
+    </preConditions>
+    <sql>
+      <![CDATA[
+        UPDATE "manualUploads"
+        SET success = CASE
+          WHEN filename = 'FFC_Manual_Batch_SFI_2025_10_24(FFC_Manual_Batch_SFI_20251024) (1).csv' THEN FALSE
+          ELSE TRUE
+        END;
+      ]]>
+    </sql>
+  </changeSet>
+</databaseChangeLog>
