@@ -5,7 +5,6 @@ module.exports = {
   VetVisits: 'AHWR',
   CS: 'CS',
   BPS: 'BPS',
-  FDMR: 'FDMR',
   MANUAL: 'Manual',
   ES: 'ES',
   FC: 'FC',
