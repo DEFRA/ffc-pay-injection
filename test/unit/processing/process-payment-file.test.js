@@ -156,14 +156,14 @@ describe('processPaymentFile additional coverage', () => {
 
     await processPaymentFile(filename)
 
-    expect(updateSuccess).toHaveBeenCalledWith(filename, false, undefined)
+    expect(updateSuccess).toHaveBeenCalledWith(filename, false)
     expect(quarantineFile).toHaveBeenCalledWith(filename, error)
   })
 
   test('calls updateSuccess with true on success', async () => {
     await processPaymentFile(filename)
 
-    expect(updateSuccess).toHaveBeenCalledWith(filename, true, undefined)
+    expect(updateSuccess).toHaveBeenCalledWith(filename, true)
   })
 
   test('calls updateSuccess with false and quarantines if sendPaymentMessages throws', async () => {
@@ -172,7 +172,7 @@ describe('processPaymentFile additional coverage', () => {
 
     await processPaymentFile(filename)
 
-    expect(updateSuccess).toHaveBeenCalledWith(filename, false, undefined)
+    expect(updateSuccess).toHaveBeenCalledWith(filename, false)
     expect(quarantineFile).toHaveBeenCalledWith(filename, error)
   })
 
