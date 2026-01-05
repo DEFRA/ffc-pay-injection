@@ -5,23 +5,29 @@ const { isPaymentFile } = require('./is-payment-file')
 const { processPaymentFile } = require('./process-payment-file')
 
 const start = async () => {
-  const transaction = await db.sequelize.transaction()
   try {
-    await db.lock.findByPk(1, { transaction, lock: true })
+    const dbLockTransaction = await db.sequelize.transaction()
+    await db.lock.findByPk(1, { transaction: dbLockTransaction, lock: true })
+    await dbLockTransaction.commit()
 
     const filenames = await getInboundFileList()
 
-    if (filenames.length > 0) {
-      for (const filename of filenames) {
-        if (isPaymentFile(filename)) {
-          await processPaymentFile(filename, transaction)
-        }
+    for (const filename of filenames) {
+      if (!isPaymentFile(filename)) {
+        continue
+      }
+
+      const transaction = await db.sequelize.transaction()
+      try {
+        await processPaymentFile(filename, transaction)
+        await transaction.commit()
+      } catch (err) {
+        console.error(`Failed to process ${filename}, rolling back database transaction.`, err)
+        await transaction.rollback()
       }
     }
-    await transaction.commit()
   } catch (err) {
-    console.error(err)
-    await transaction.rollback()
+    console.error('Unexpected error in processing loop:', err)
   } finally {
     setTimeout(start, config.processingInterval)
   }
