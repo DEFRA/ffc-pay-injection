@@ -37,13 +37,25 @@ module.exports = {
     try {
       const checksum = await getFileChecksum(filename)
 
-      const existing = await db.manualUpload.findOne({
+      const existingAndSuccessful = await db.manualUpload.findOne({
         where: {
-          [db.Sequelize.Op.or]: [{ filename }, { checksum }]
+          [db.Sequelize.Op.or]: [
+            {
+              success: true,
+              [db.Sequelize.Op.or]: [
+                { filename },
+                { checksum }
+              ]
+            },
+            {
+              success: false,
+              filename
+            }
+          ]
         }
       })
 
-      if (existing) {
+      if (existingAndSuccessful) {
         await quarantineFile(filename, 'staging')
 
         return h
