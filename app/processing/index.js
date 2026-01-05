@@ -22,7 +22,7 @@ const start = async () => {
         await processPaymentFile(filename, transaction)
         await transaction.commit()
       } catch (err) {
-        console.error(`Failed to process ${filename}:`, err)
+        console.error(`Failed to process ${filename}, rolling back database transaction.`, err)
         await transaction.rollback()
       }
     }

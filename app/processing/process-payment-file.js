@@ -14,7 +14,7 @@ const processPaymentFile = async (filename, transaction) => {
   try {
     paymentRequests = await parsePaymentFile(data, filename, transaction)
   } catch (err) {
-    await quarantineFile(filename, err)
+    await quarantineFile(filename)
     await updateSuccess(filename, false)
     throw err
   }
@@ -27,7 +27,7 @@ const processPaymentFile = async (filename, transaction) => {
       await archiveFile(filename)
       await sendSuccessEvent(filename)
     } catch (err) {
-      await quarantineFile(filename, err)
+      await quarantineFile(filename)
       await updateSuccess(filename, false)
       throw err
     }
