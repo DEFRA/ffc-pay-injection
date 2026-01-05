@@ -16,7 +16,7 @@ const processPaymentFile = async (filename, transaction) => {
   } catch (err) {
     await quarantineFile(filename, err)
     await updateSuccess(filename, false)
-    return
+    throw err
   }
 
   if (paymentRequests?.length) {
@@ -29,6 +29,7 @@ const processPaymentFile = async (filename, transaction) => {
     } catch (err) {
       await quarantineFile(filename, err)
       await updateSuccess(filename, false)
+      throw err
     }
   }
 }
