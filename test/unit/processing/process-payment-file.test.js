@@ -16,7 +16,9 @@ const { processPaymentFile } = require('../../../app/processing/process-payment-
 const filename = 'FFCS_Manual_Batch_20230913140000.csv'
 
 describe('parsePaymentFile validations', () => {
-  const { parsePaymentFile: realParse } = jest.requireActual('../../../app/processing/parse-payment-file')
+  const { parsePaymentFile: realParse } = jest.requireActual(
+    '../../../app/processing/parse-payment-file'
+  )
 
   test.each([
     ['', 'No data found in payment file'],
@@ -30,6 +32,7 @@ describe('processPaymentFile', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     parsePaymentFile.mockResolvedValue([{ schemeId: 1 }])
+    downloadFile.mockResolvedValue('file data')
   })
 
   const run = () => processPaymentFile(filename)
@@ -49,9 +52,11 @@ describe('processPaymentFile', () => {
     ['does not quarantine on success', false]
   ])('%s', async (_, shouldQuarantine) => {
     if (shouldQuarantine) {
-      parsePaymentFile.mockImplementation(() => { throw new Error('Parse error') })
-      await run()
-      expect(quarantineFile).toHaveBeenCalledWith(filename, new Error('Parse error'))
+      const error = new Error('Parse error')
+      parsePaymentFile.mockRejectedValue(error)
+
+      await expect(run()).rejects.toThrow(error)
+      expect(quarantineFile).toHaveBeenCalledWith(filename, error)
     } else {
       await run()
       expect(quarantineFile).not.toHaveBeenCalled()
@@ -63,13 +68,14 @@ describe('processPaymentFile', () => {
     ['does not archive on parse error', false]
   ])('%s', async (_, shouldArchive) => {
     if (!shouldArchive) {
-      parsePaymentFile.mockImplementation(() => { throw new Error('Parse error') })
-    }
-    await run()
-    if (shouldArchive) {
-      expect(archiveFile).toHaveBeenCalledWith(filename)
-    } else {
+      const error = new Error('Parse error')
+      parsePaymentFile.mockRejectedValue(error)
+
+      await expect(run()).rejects.toThrow(error)
       expect(archiveFile).not.toHaveBeenCalled()
+    } else {
+      await run()
+      expect(archiveFile).toHaveBeenCalledWith(filename)
     }
   })
 
@@ -78,15 +84,14 @@ describe('processPaymentFile', () => {
     ['does not send messages on parse error', false]
   ])('%s', async (_, shouldSend) => {
     if (!shouldSend) {
-      parsePaymentFile.mockImplementation(() => { throw new Error('Parse error') })
-    }
+      const error = new Error('Parse error')
+      parsePaymentFile.mockRejectedValue(error)
 
-    await run()
-
-    if (shouldSend) {
-      expect(sendPaymentMessages).toHaveBeenCalled()
-    } else {
+      await expect(run()).rejects.toThrow(error)
       expect(sendPaymentMessages).not.toHaveBeenCalled()
+    } else {
+      await run()
+      expect(sendPaymentMessages).toHaveBeenCalled()
     }
   })
 
@@ -95,45 +100,25 @@ describe('processPaymentFile', () => {
     expect(sendSuccessEvent).toHaveBeenCalledWith(filename)
   })
 
-  test('should quarantine file if sendPaymentMessages fails', async () => {
-    sendPaymentMessages.mockImplementation(() => {
-      throw new Error('Messaging error')
-    })
-    await processPaymentFile(filename)
-    expect(quarantineFile).toHaveBeenCalledWith(filename, new Error('Messaging error'))
-  })
+  test('quarantines and rethrows if sendPaymentMessages fails', async () => {
+    const error = new Error('Messaging error')
+    sendPaymentMessages.mockRejectedValue(error)
 
-  test('should not archive file if sendPaymentMessages fails', async () => {
-    sendPaymentMessages.mockImplementation(() => {
-      throw new Error('Messaging error')
-    })
-    await processPaymentFile(filename)
+    await expect(run()).rejects.toThrow(error)
+
+    expect(updateSuccess).toHaveBeenCalledWith(filename, false)
+    expect(quarantineFile).toHaveBeenCalledWith(filename, error)
     expect(archiveFile).not.toHaveBeenCalled()
-  })
-
-  test('should not send success event if sendPaymentMessages fails', async () => {
-    sendPaymentMessages.mockImplementation(() => {
-      throw new Error('Messaging error')
-    })
-    await processPaymentFile(filename)
     expect(sendSuccessEvent).not.toHaveBeenCalled()
   })
 
-  test('should not send messages if paymentRequests is empty', async () => {
+  test('does nothing when paymentRequests is empty', async () => {
     parsePaymentFile.mockResolvedValue([])
-    await processPaymentFile(filename)
+
+    await run()
+
     expect(sendPaymentMessages).not.toHaveBeenCalled()
-  })
-
-  test('should not archive file if paymentRequests is empty', async () => {
-    parsePaymentFile.mockResolvedValue([])
-    await processPaymentFile(filename)
     expect(archiveFile).not.toHaveBeenCalled()
-  })
-
-  test('should not send success event if paymentRequests is empty', async () => {
-    parsePaymentFile.mockResolvedValue([])
-    await processPaymentFile(filename)
     expect(sendSuccessEvent).not.toHaveBeenCalled()
   })
 })
@@ -150,33 +135,33 @@ describe('processPaymentFile additional coverage', () => {
     downloadFile.mockResolvedValue('file data')
   })
 
-  test('calls updateSuccess with false and quarantines if parsePaymentFile throws', async () => {
+  test('calls updateSuccess(false) and quarantines if parsePaymentFile throws', async () => {
     const error = new Error('Parse error')
     parsePaymentFile.mockRejectedValue(error)
 
-    await processPaymentFile(filename)
+    await expect(processPaymentFile(filename)).rejects.toThrow(error)
 
-    expect(updateSuccess).toHaveBeenCalledWith(filename, false, undefined)
+    expect(updateSuccess).toHaveBeenCalledWith(filename, false)
     expect(quarantineFile).toHaveBeenCalledWith(filename, error)
   })
 
-  test('calls updateSuccess with true on success', async () => {
+  test('calls updateSuccess(true) on success', async () => {
     await processPaymentFile(filename)
 
-    expect(updateSuccess).toHaveBeenCalledWith(filename, true, undefined)
+    expect(updateSuccess).toHaveBeenCalledWith(filename, true)
   })
 
-  test('calls updateSuccess with false and quarantines if sendPaymentMessages throws', async () => {
+  test('calls updateSuccess(false) and quarantines if sendPaymentMessages throws', async () => {
     const error = new Error('Messaging error')
     sendPaymentMessages.mockRejectedValue(error)
 
-    await processPaymentFile(filename)
+    await expect(processPaymentFile(filename)).rejects.toThrow(error)
 
-    expect(updateSuccess).toHaveBeenCalledWith(filename, false, undefined)
+    expect(updateSuccess).toHaveBeenCalledWith(filename, false)
     expect(quarantineFile).toHaveBeenCalledWith(filename, error)
   })
 
-  test('throws if downloadFile fails', async () => {
+  test('throws immediately if downloadFile fails', async () => {
     const error = new Error('Download failed')
     downloadFile.mockRejectedValue(error)
 
@@ -187,18 +172,9 @@ describe('processPaymentFile additional coverage', () => {
     expect(quarantineFile).not.toHaveBeenCalled()
   })
 
-  test('does not call archiveFile or sendSuccessEvent if paymentRequests is empty', async () => {
-    parsePaymentFile.mockResolvedValue([])
-
-    await processPaymentFile(filename)
-
-    expect(archiveFile).not.toHaveBeenCalled()
-    expect(sendSuccessEvent).not.toHaveBeenCalled()
-  })
-
-  test('logs info and log messages', async () => {
-    const infoSpy = jest.spyOn(console, 'info').mockImplementation(() => { })
-    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => { })
+  test('logs info and payment summary', async () => {
+    const infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {})
+    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
 
     await processPaymentFile(filename)
 

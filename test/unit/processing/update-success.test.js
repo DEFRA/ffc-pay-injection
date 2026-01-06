@@ -14,25 +14,12 @@ describe('updateSuccess', () => {
   test('calls db.manualUpload.update with correct parameters', async () => {
     const filename = 'testfile.csv'
     const success = true
-    const transaction = { id: 'txn1' }
-
-    await updateSuccess(filename, success, transaction)
-
-    expect(db.manualUpload.update).toHaveBeenCalledWith(
-      { success },
-      { where: { filename }, transaction }
-    )
-  })
-
-  test('calls db.manualUpload.update with undefined transaction if not provided', async () => {
-    const filename = 'testfile.csv'
-    const success = false
 
     await updateSuccess(filename, success)
 
     expect(db.manualUpload.update).toHaveBeenCalledWith(
       { success },
-      { where: { filename }, transaction: undefined }
+      { where: { filename } }
     )
   })
 
