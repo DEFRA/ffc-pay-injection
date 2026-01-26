@@ -77,7 +77,7 @@ secretProviderClass:
         objectType: secret
 
   secretObjects: # creating a Kubernetes secret from the Azure Key Vault secrets
-    - secretName: ffc-pay-batch-processor
+    - secretName: ffc-pay-injection
       type: Opaque
       data:
         - objectName: appInsights-connectionString # secret name in Azure Key Vault
