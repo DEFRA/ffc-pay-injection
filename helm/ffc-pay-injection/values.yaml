@@ -15,7 +15,7 @@ containerConfigMap:
   name: ffc-pay-injection-config-map
 
 containerSecret:
-  name: ffc-pay-injection-container-secret
+  name: ffc-pay-injection
   type: Opaque
 
 deployment: {}

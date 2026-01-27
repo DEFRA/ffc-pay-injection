@@ -46,14 +46,14 @@ extends:
     # failOnThreshold: moderate
     variableGroupName: ffc-pay-injection-env-var
     pr_params:
-      processingActive: $(pr_processingActive)
+      processingActive: ${{ eq(variables['pr_processingActive'], 'true') }}
     snd2_params:
-      processingActive: $(snd2_processingActive)
+      processingActive: ${{ eq(variables['snd2_processingActive'], 'true') }}
     dev_params:
-      processingActive: $(dev_processingActive)
+      processingActive: ${{ eq(variables['dev_processingActive'], 'true') }}
     test_params:
-      processingActive: $(test_processingActive)
+      processingActive: ${{ eq(variables['test_processingActive'], 'true') }}
     pre_params:
-      processingActive: $(pre_processingActive)
+      processingActive: ${{ eq(variables['pre_processingActive'], 'true') }}
     prd_params:
-      processingActive: $(prd_processingActive)
+      processingActive: ${{ eq(variables['prd_processingActive'], 'true') }}
