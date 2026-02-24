@@ -5,7 +5,7 @@ data:
   APPINSIGHTS_CLOUDROLE: {{ quote .Values.name }}
   MESSAGE_QUEUE_HOST: {{ quote .Values.container.messageQueueHost }}
   PROCESSING_ACTIVE: {{ quote .Values.container.processingActive }}
-  {{- if and (.Values.environmentCode) (not .Values.pr) }}
+  {{- if (.Values.environmentCode) }}
   PAYMENT_TOPIC_ADDRESS: {{ .Values.container.paymentTopicAddress }}-{{ .Values.environmentCode }}
   EVENTS_TOPIC_ADDRESS: {{ .Values.container.eventsTopicAddress }}-{{ .Values.environmentCode }}
   {{ else }}
@@ -25,4 +25,5 @@ data:
   POSTGRES_HOST: {{ quote .Values.postgresService.postgresqlHost }}
   POSTGRES_PORT: {{ quote .Values.postgresService.postgresPort }}
   POSTGRES_SCHEMA_NAME: {{ quote .Values.postgresService.postgresSchema }}
+  POSTGRES_USERNAME: {{ .Values.postgresService.postgresUser | quote }}
 {{- end -}}
