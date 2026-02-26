@@ -13,5 +13,6 @@ module.exports = {
   DELINKED: 'DP',
   SFI_EXPANDED: 'ESFIO',
   COHT_REVENUE: 'COHTR',
-  COHT_CAPITAL: 'COHTC'
+  COHT_CAPITAL: 'COHTC',
+  FPTT: 'FPTT'
 }
