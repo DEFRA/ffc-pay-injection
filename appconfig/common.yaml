@@ -1,2 +1,0 @@
-container.paymentTopicAddress: queue:ffc-pay-request
-container.eventsTopicAddress: queue:ffc-pay-events
