@@ -23,7 +23,8 @@ const indexes = {
   accountCodeIndex: 9,
   fundCodeIndex: 15,
   deliveryBodyIndex: 16,
-  agreementNumberIndex: 17
+  agreementNumberIndex: 17,
+  invoiceNumberIndex: 18
 }
 
 const getPaymentRequests = (csv) => {
@@ -31,8 +32,10 @@ const getPaymentRequests = (csv) => {
     const values = y.split(',')
     const schemeValues = values[indexes.schemeIndex].split('_')
     const schemeId = getSchemeId(schemeValues[indexes.schemeSchemeIndex])
-    const key = `${schemeId}-${values[indexes.frnIndex]}-${values[indexes.marketingYearIndex]}-${values[indexes.contractNumberIndex]}`
-
+    let key = `${schemeId}-${values[indexes.frnIndex]}-${values[indexes.marketingYearIndex]}-${values[indexes.contractNumberIndex]}`
+    if (values[indexes.invoiceNumberIndex]) {
+      key += `-${values[indexes.invoiceNumberIndex]}`
+    }
     // if key doesn't exist then first instance so create new group
     const item = x.get(key) || ({
       schemeId,
@@ -47,6 +50,7 @@ const getPaymentRequests = (csv) => {
       originalInvoiceNumber: values[indexes.originalInvoiceNumberIndex] || undefined,
       originalSettlementDate: values[indexes.originalSettlementDateIndex] || undefined,
       pillar: schemeValues[indexes.schemePillarIndex],
+      invoiceNumber: values[indexes.invoiceNumberIndex],
       invoiceLines: [],
       value: 0
     })

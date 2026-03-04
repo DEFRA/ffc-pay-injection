@@ -11,6 +11,7 @@ describe('getPaymentRequests', () => {
   beforeEach(() => jest.clearAllMocks())
 
   const csvLine = 'S1,1234567890,2021,CN123,SCH123,Descr,1000,2021-01-01,Q4,ACC1,AP,adm,'
+  const csvLineWithInvoiceNumber = 'S1,1234567890,2021,CN123,SCH123,Descr,1000,2021-01-01,Q4,ACC1,AP,adm,,,,,,,INV123'
 
   const expectedPaymentRequest = {
     schemeId: 1,
@@ -25,6 +26,7 @@ describe('getPaymentRequests', () => {
     originalInvoiceNumber: undefined,
     originalSettlementDate: undefined,
     pillar: undefined,
+    invoiceNumber: undefined,
     invoiceLines: [
       {
         schemeCode: 'SCH123',
@@ -39,6 +41,22 @@ describe('getPaymentRequests', () => {
     value: 100000
   }
 
+  const expectedPaymentRequestWithInvoiceNumber = {
+    ...expectedPaymentRequest,
+    invoiceNumber: 'INV123',
+    invoiceLines: [
+      {
+        schemeCode: 'SCH123',
+        description: 'Description',
+        value: '1000',
+        accountCode: 'ACC1',
+        fundCode: '',
+        deliveryBody: '',
+        agreementNumber: ''
+      }
+    ]
+  }
+
   beforeEach(() => {
     getSchemeId.mockReturnValue(1)
     convertToPence.mockReturnValue(100000)
@@ -46,15 +64,16 @@ describe('getPaymentRequests', () => {
   })
 
   test.each([
-    ['single CSV line', [csvLine], 1],
-    ['CSV with empty lines', ['', csvLine, ''], 1],
-    ['empty CSV', [], 0]
-  ])('handles %s correctly', (desc, csv, expectedLength) => {
+    ['single CSV line', [csvLine], 1, expectedPaymentRequest],
+    ['CSV with empty lines', ['', csvLine, ''], 1, expectedPaymentRequest],
+    ['empty CSV', [], 0, null],
+    ['CSV line with invoice number', [csvLineWithInvoiceNumber], 1, expectedPaymentRequestWithInvoiceNumber]
+  ])('handles %s correctly', (desc, csv, expectedLength, expectedRequest) => {
     const result = getPaymentRequests(csv)
 
     expect(result).toHaveLength(expectedLength)
     if (expectedLength > 0) {
-      expect(result[0]).toEqual(expectedPaymentRequest)
+      expect(result[0]).toEqual(expectedRequest)
     } else {
       expect(result).toEqual([])
     }
