@@ -35,6 +35,17 @@ describe('createInvoiceNumber', () => {
     expect(result).toBe('X0000001123456V000')
   })
 
+  test('should return invoice number if one is set', async () => {
+    const mockPRWithInvoiceNumber = {
+      ...mockPaymentRequest,
+      invoiceNumber: 'X1234Z1234V000'
+    }
+    const result = await createInvoiceNumber(mockPRWithInvoiceNumber, mockTransaction)
+
+    expect(db.invoiceNumber.create).not.toHaveBeenCalled()
+    expect(result).toBe('X1234Z1234V000')
+  })
+
   test('should handle error during invoice number creation', async () => {
     db.invoiceNumber.create.mockRejectedValue(new Error('Database error'))
 
