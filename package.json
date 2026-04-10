@@ -1,6 +1,6 @@
 {
   "name": "ffc-pay-injection",
-  "version": "1.2.25",
+  "version": "1.2.28",
   "description": "Inject payments",
   "homepage": "https://github.com/DEFRA/ffc-pay-injection",
   "main": "app/index.js",
@@ -29,8 +29,8 @@
     "@hapi/hapi": "21.4.0",
     "applicationinsights": "2.9.6",
     "ffc-database": "1.0.24",
-    "ffc-messaging": "2.10.1",
-    "ffc-pay-event-publisher": "1.2.0",
+    "ffc-messaging": "2.10.5",
+    "ffc-pay-event-publisher": "1.2.3",
     "hapi-pino": "13.0.0",
     "joi": "18.0.1",
     "log-timestamp": "0.3.0",
