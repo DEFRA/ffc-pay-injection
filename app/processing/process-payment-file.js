@@ -2,7 +2,7 @@ const util = require('util')
 const { archiveFile, downloadFile } = require('../storage')
 const { parsePaymentFile } = require('./parse-payment-file')
 const { quarantineFile } = require('./quarantine-file')
-const { sendPaymentMessages } = require('../messaging')
+const { sendPaymentMessages } = require('../messaging/send-payment-message')
 const { sendSuccessEvent } = require('../event')
 const { updateSuccess } = require('./update-success')
 
