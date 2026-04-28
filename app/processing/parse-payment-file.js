@@ -30,7 +30,7 @@ const parsePaymentFile = async (data, filename, transaction) => {
     paymentRequest.debtType = paymentRequest.debtType?.toLowerCase()
     paymentRequest.value = convertToPounds(paymentRequest.value)
     paymentRequest.invoiceNumber = await createInvoiceNumber(paymentRequest, transaction)
-    paymentRequest.agreementNumber = paymentRequest.invoiceLines?.[0]?.agreementNumber
+    paymentRequest.agreementNumber = paymentRequest.invoiceLines?.[0]?.agreementNumber ?? paymentRequest.contractNumber
   }
 
   return paymentRequests
