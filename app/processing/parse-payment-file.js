@@ -1,5 +1,5 @@
 const moment = require('moment')
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('node:crypto')
 const { GBP } = require('../constants/currency')
 const { INJECTION } = require('../constants/source-system')
 const { convertToPounds } = require('../currency-convert')
@@ -21,7 +21,7 @@ const parsePaymentFile = async (data, filename, transaction) => {
   for (const paymentRequest of paymentRequests) {
     paymentRequest.sourceSystem = INJECTION
     paymentRequest.paymentRequestNumber = 0
-    paymentRequest.correlationId = uuidv4()
+    paymentRequest.correlationId = randomUUID()
     paymentRequest.currency = GBP
     paymentRequest.batch = filename
     paymentRequest.dueDate = paymentRequest.dueDate ? moment(paymentRequest.dueDate, acceptedDateFormats).format(outputDateFormat) : undefined
@@ -29,8 +29,8 @@ const parsePaymentFile = async (data, filename, transaction) => {
     paymentRequest.originalSettlementDate = paymentRequest.originalSettlementDate ? moment(paymentRequest.originalSettlementDate, acceptedDateFormats).format(outputDateFormat) : undefined
     paymentRequest.debtType = paymentRequest.debtType?.toLowerCase()
     paymentRequest.value = convertToPounds(paymentRequest.value)
+    paymentRequest.agreementNumber = paymentRequest.invoiceLines?.[0]?.agreementNumber ?? paymentRequest.contractNumber
     paymentRequest.invoiceNumber = await createInvoiceNumber(paymentRequest, transaction)
-    paymentRequest.agreementNumber = paymentRequest.invoiceLines?.[0]?.agreementNumber
   }
 
   return paymentRequests

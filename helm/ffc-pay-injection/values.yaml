@@ -26,6 +26,8 @@ container:
   limitMemory: 180Mi
   limitCpu: 120m
   messageQueueHost: namespace.servicebus.windows.net
+  retentionTopicAddress: fcp-pds-data-retention
+  retentionSubscriptionAddress: ffc-pay-injection
   paymentTopicAddress: ffc-pay-request
   eventsTopicAddress: ffc-pay-events
   azureStorageAccountName: ffcpay
