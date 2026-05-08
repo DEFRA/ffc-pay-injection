@@ -36,4 +36,5 @@ services:
 
   ffc-pay-injection-azurite:
     image: mcr.microsoft.com/azure-storage/azurite:3.35.0
-    command: "azurite-blob --skipApiVersionCheck --loose --blobHost 0.0.0.0"
+    command: "azurite-blob --skipApiVersionCheck --blobHost 0.0.0.0"
+
