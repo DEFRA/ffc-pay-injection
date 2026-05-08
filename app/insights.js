@@ -6,8 +6,8 @@ function setup () {
   if (connectionString) {
     useAzureMonitor({
       azureMonitorExporterOptions: {
-        connectionString,
-      },
+        connectionString
+      }
     })
 
     console.log('Azure Monitor (OpenTelemetry) Running')
