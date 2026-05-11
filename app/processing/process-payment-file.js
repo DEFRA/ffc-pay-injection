@@ -1,4 +1,3 @@
-const util = require('util')
 const { archiveFile, downloadFile } = require('../storage')
 const { parsePaymentFile } = require('./parse-payment-file')
 const { quarantineFile } = require('./quarantine-file')
@@ -22,7 +21,7 @@ const processPaymentFile = async (filename, transaction) => {
   if (paymentRequests?.length) {
     try {
       await sendPaymentMessages(paymentRequests)
-      console.log('Payments published:', util.inspect(paymentRequests, false, null, true))
+      console.log(`Payments published: ${filename}`)
       await updateSuccess(filename, true)
       await archiveFile(filename)
       await sendSuccessEvent(filename)

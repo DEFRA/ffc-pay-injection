@@ -180,8 +180,7 @@ describe('processPaymentFile additional coverage', () => {
 
     expect(infoSpy).toHaveBeenCalledWith(`Processing payment file: ${filename}`)
     expect(logSpy).toHaveBeenCalledWith(
-      'Payments published:',
-      expect.stringContaining('schemeId')
+      `Payments published: ${filename}`
     )
 
     infoSpy.mockRestore()
