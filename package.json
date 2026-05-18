@@ -25,7 +25,7 @@
   "license": "OGL-UK-3.0",
   "dependencies": {
     "@azure/identity": "4.13.1",
-    "@azure/monitor-opentelemetry": "1.16.0",
+    "@azure/monitor-opentelemetry": "1.18.0",
     "@azure/storage-blob": "12.31.0",
     "@hapi/hapi": "21.4.0",
     "ffc-database": "1.0.25",
@@ -45,6 +45,9 @@
     "jest-junit": "17.0.0",
     "neostandard": "0.12.2",
     "nodemon": "3.0.1"
+  },
+  "overrides": {
+    "protobufjs": "8.0.2"
   },
   "nodemonConfig": {
     "ignore": [
