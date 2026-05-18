@@ -32,6 +32,7 @@ value.isTest = value.env === TEST
 value.isProd = value.env === PRODUCTION
 value.paymentTopic = mqConfig.paymentTopic
 value.eventsTopic = mqConfig.eventsTopic
+value.retentionSubscription = mqConfig.retentionSubscription
 value.storageConfig = storageConfig
 value.dbConfig = dbConfig
 value.serverConfig = serverConfig

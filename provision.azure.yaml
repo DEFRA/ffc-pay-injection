@@ -4,6 +4,18 @@ resources:
     name: ffc-pay-injection
   service_bus:
     topics:
+      - name: fcp-pds-data-retention
+        defaultMessageTimeToLive: P3650D
+        duplicateDetectionHistoryTimeWindow: PT10M30S
+        requiresDuplicateDetection: true
+        roles: 
+        - name: receiver
+        subscriptions:
+          - name: ffc-pay-injection
+            deadLetteringOnMessageExpiration: true
+            defaultMessageTimeToLive: P3650D
+            lockDuration: PT5M
+            maxDeliveryCount: 2000
       - name: ffc-pay-request
         defaultMessageTimeToLive: P3650D
         duplicateDetectionHistoryTimeWindow: PT10M30S

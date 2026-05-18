@@ -26,6 +26,8 @@ services:
       MESSAGE_QUEUE_PASSWORD: SAS_KEY_VALUE
       PAYMENT_TOPIC_ADDRESS: ffc-pay-request-test
       EVENTS_TOPIC_ADDRESS: ffc-pay-events-test
+      RETENTION_TOPIC_ADDRESS: fcp-pds-data-retention
+      RETENTION_SUBSCRIPTION_ADDRESS: ffc-pay-injection
 
   ffc-pay-injection-postgres:
     volumes:
