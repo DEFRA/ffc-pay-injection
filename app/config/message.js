@@ -7,7 +7,6 @@ const mqSchema = Joi.object({
     username: Joi.string(),
     password: Joi.string(),
     useCredentialChain: Joi.bool().default(false),
-    appInsights: Joi.object(),
     managedIdentityClientId: Joi.string().optional()
   },
   paymentTopic: {
@@ -15,15 +14,20 @@ const mqSchema = Joi.object({
   },
   eventsTopic: {
     address: Joi.string()
+  },
+  retentionSubscription: {
+    address: Joi.string().required(),
+    topic: Joi.string().required(),
+    type: Joi.string().default('subscription')
   }
 })
+
 const mqConfig = {
   messageQueue: {
     host: process.env.MESSAGE_QUEUE_HOST,
     username: process.env.MESSAGE_QUEUE_USER,
     password: process.env.MESSAGE_QUEUE_PASSWORD,
     useCredentialChain: process.env.NODE_ENV === PRODUCTION,
-    appInsights: process.env.NODE_ENV === PRODUCTION ? require('applicationinsights') : undefined,
     managedIdentityClientId: process.env.AZURE_CLIENT_ID
   },
   paymentTopic: {
@@ -31,6 +35,10 @@ const mqConfig = {
   },
   eventsTopic: {
     address: process.env.EVENTS_TOPIC_ADDRESS
+  },
+  retentionSubscription: {
+    address: process.env.RETENTION_SUBSCRIPTION_ADDRESS,
+    topic: process.env.RETENTION_TOPIC_ADDRESS
   }
 }
 
@@ -44,8 +52,10 @@ if (mqResult.error) {
 
 const paymentTopic = { ...mqResult.value.messageQueue, ...mqResult.value.paymentTopic }
 const eventsTopic = { ...mqResult.value.messageQueue, ...mqResult.value.eventsTopic }
+const retentionSubscription = { ...mqResult.value.messageQueue, ...mqResult.value.retentionSubscription }
 
 module.exports = {
   paymentTopic,
-  eventsTopic
+  eventsTopic,
+  retentionSubscription
 }
