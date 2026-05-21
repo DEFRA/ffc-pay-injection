@@ -6,7 +6,7 @@ const { sendSuccessEvent } = require('../event')
 const { updateSuccess } = require('./update-success')
 
 const processPaymentFile = async (filename, transaction) => {
-  console.info(`Processing payment file: ${filename}`)
+  console.info(`Processing payment file for ${filename}`)
   const data = await downloadFile(filename)
 
   let paymentRequests
