@@ -21,7 +21,7 @@ const processPaymentFile = async (filename, transaction) => {
   if (paymentRequests?.length) {
     try {
       await sendPaymentMessages(paymentRequests)
-      console.log(`Payments published: ${filename}`)
+      console.log(`Payments published for ${filename}`)
       await updateSuccess(filename, true)
       await archiveFile(filename)
       await sendSuccessEvent(filename)

@@ -178,7 +178,7 @@ describe('processPaymentFile additional coverage', () => {
 
     await processPaymentFile(filename)
 
-    expect(infoSpy).toHaveBeenCalledWith(`Processing payment file: ${filename}`)
+    expect(infoSpy).toHaveBeenCalledWith(`Processing payment file for ${filename}`)
     expect(logSpy).toHaveBeenCalledWith(
       `Payments published: ${filename}`
     )
