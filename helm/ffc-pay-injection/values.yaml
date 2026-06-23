@@ -41,6 +41,7 @@ container:
   quarantineFolder: quarantine
   processingActive: true
   port: 3014
+  azureLogLevel: error
 
 postgresService:
   postgresDb: ffc_pay_injection
