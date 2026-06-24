@@ -8,7 +8,7 @@ const { DEVELOPMENT, TEST, PRODUCTION } = require('../constants/environments')
 const schema = Joi.object({
   processingActive: Joi.boolean().default(true),
   env: Joi.string().valid(DEVELOPMENT, TEST, PRODUCTION).default(DEVELOPMENT),
-  processingInterval: Joi.number().default(10000)
+  processingInterval: Joi.number().default(60000)
 })
 
 const config = {
