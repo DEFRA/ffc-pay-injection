@@ -18,9 +18,9 @@
 
     <createIndex indexName="idx_invoice_numbers_agreement_frn_scheme"
                  tableName="invoiceNumbers">
-      <column name="agreement_number"/>
+      <column name="agreementNumber"/>
       <column name="frn"/>
-      <column name="scheme_id"/>
+      <column name="schemeId"/>
     </createIndex>
   </changeSet>
 </databaseChangeLog>
