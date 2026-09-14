@@ -15,7 +15,8 @@ const {
   COHT_REVENUE,
   COHT_CAPITAL,
   FPTT,
-  WMP
+  WMP,
+  SFI26
 } = require('../constants/schemes')
 
 const {
@@ -35,7 +36,8 @@ const {
   COHT_REVENUE: COHT_REVENUE_NAME,
   COHT_CAPITAL: COHT_CAPITAL_NAME,
   FPTT: FPTT_NAME,
-  WMP: WMP_NAME
+  WMP: WMP_NAME,
+  SFI26: SFI26_NAME
 } = require('../constants/schemes-names')
 
 const mapSchemeNames = {
@@ -55,7 +57,8 @@ const mapSchemeNames = {
   [COHT_REVENUE_NAME.toLowerCase()]: COHT_REVENUE,
   [COHT_CAPITAL_NAME.toLowerCase()]: COHT_CAPITAL,
   [FPTT_NAME.toLowerCase()]: FPTT,
-  [WMP_NAME.toLowerCase()]: WMP
+  [WMP_NAME.toLowerCase()]: WMP,
+  [SFI26_NAME.toLowerCase()]: SFI26
 }
 
 const idMap = Object.fromEntries(
@@ -76,7 +79,8 @@ const idMap = Object.fromEntries(
     COHT_REVENUE,
     COHT_CAPITAL,
     FPTT,
-    WMP
+    WMP,
+    SFI26
   })
     .filter(val => val != null)
     .map(val => [val.toString(), val])
