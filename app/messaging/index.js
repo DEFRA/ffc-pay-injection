@@ -9,7 +9,7 @@ const start = async () => {
   sbClient = createServiceBusClient(config.retentionSubscription)
   const retentionAction = message => processRetentionMessage(message, retentionReceiver)
   retentionReceiver = createReceiver(sbClient, config.retentionSubscription)
-  await subscribeReceiver(retentionReceiver, retentionAction)
+  subscribeReceiver(retentionReceiver, retentionAction)
 
   console.log('Ready to receive retention messages')
 }
