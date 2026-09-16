@@ -1,19 +1,39 @@
-const { MessageReceiver } = require('ffc-messaging')
+const { createServiceBusClient, createReceiver, subscribeReceiver, closeSenders } = require('./service-bus')
 const config = require('../config')
 const { processRetentionMessage } = require('./process-retention-message')
 
+let sbClient
 let retentionReceiver
 
 const start = async () => {
+  sbClient = createServiceBusClient(config.retentionSubscription)
   const retentionAction = message => processRetentionMessage(message, retentionReceiver)
-  retentionReceiver = new MessageReceiver(config.retentionSubscription, retentionAction)
-  await retentionReceiver.subscribe()
+  retentionReceiver = createReceiver(sbClient, config.retentionSubscription)
+  await subscribeReceiver(retentionReceiver, retentionAction)
 
   console.log('Ready to receive retention messages')
 }
 
 const stop = async () => {
-  await retentionReceiver.closeConnection()
+  if (retentionReceiver) {
+    try {
+      await retentionReceiver.close()
+    } catch (err) {
+      console.error('Error closing retention receiver:', err)
+    }
+  }
+  retentionReceiver = null
+
+  if (sbClient) {
+    try {
+      await sbClient.close()
+    } catch (err) {
+      console.error('Error closing Service Bus client:', err)
+    }
+  }
+  sbClient = null
+
+  await closeSenders()
 }
 
 module.exports = { start, stop }
