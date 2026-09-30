@@ -20,7 +20,7 @@ jest.mock('ffc-pay-event-publisher', () => ({
 const path = require('path')
 const { BlobServiceClient } = require('@azure/storage-blob')
 
-const db = require('../../app/data')
+const db = require('../../app/database')
 const storageConfig = require('../../app/config/storage')
 const { start } = require('../../app/processing')
 const { BATCH_QUARANTINED, BATCH_PROCESSED } = require('../../app/constants/events')
@@ -55,7 +55,7 @@ describe('process files', () => {
   })
 
   afterAll(async () => {
-    await db.sequelize.close()
+    await db.close()
   })
 
   test('processes minimal file correctly', async () => {
