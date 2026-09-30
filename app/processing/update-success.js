@@ -1,12 +1,7 @@
-const db = require('../data')
+const { manualUploads } = require('../database')
 
 const updateSuccess = async (filename, success) => {
-  await db.manualUpload.update(
-    { success },
-    {
-      where: { filename }
-    }
-  )
+  await manualUploads().where({ filename }).update({ success })
 }
 
 module.exports = {
