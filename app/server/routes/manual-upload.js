@@ -7,7 +7,7 @@ const {
 
 const { POST } = require('../../constants/methods')
 
-const db = require('../../data')
+const { manualUploads } = require('../../database')
 const { getFileChecksum, acceptFile, quarantineFile } = require('../../storage')
 
 module.exports = {
@@ -37,23 +37,17 @@ module.exports = {
     try {
       const checksum = await getFileChecksum(filename)
 
-      const existingAndSuccessful = await db.manualUpload.findOne({
-        where: {
-          [db.Sequelize.Op.or]: [
-            {
-              success: true,
-              [db.Sequelize.Op.or]: [
-                { filename },
-                { checksum }
-              ]
-            },
-            {
-              success: false,
-              filename
-            }
-          ]
-        }
-      })
+      const existingAndSuccessful = await manualUploads()
+        .where(function () {
+          this.where(function () {
+            this.where('success', true).andWhere(function () {
+              this.where('filename', filename).orWhere('checksum', checksum)
+            })
+          }).orWhere(function () {
+            this.where('success', false).andWhere('filename', filename)
+          })
+        })
+        .first() ?? null
 
       if (existingAndSuccessful) {
         await quarantineFile(filename, 'staging')
@@ -69,7 +63,7 @@ module.exports = {
 
       await acceptFile(filename)
 
-      await db.manualUpload.create({
+      await manualUploads().insert({
         uploader,
         filename,
         timeStamp: new Date(),
