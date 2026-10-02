@@ -12,7 +12,7 @@ const start = async () => {
 
     const filenames = await getInboundFileList()
 
-    for (const filename in filenames) {
+    for (const filename of filenames) {
       if (!isPaymentFile(filename)) {
         continue
       }
