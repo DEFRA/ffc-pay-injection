@@ -62,6 +62,24 @@ describe('processing start', () => {
     expect(mockDb.trx.rollback).toHaveBeenCalledTimes(1)
   })
 
+  test('processes payment files one at a time in order and continues after a failure', async () => {
+    getInboundFileList.mockResolvedValue(['a.csv', 'b.csv', 'ignore.txt', 'c.csv'])
+    const events = []
+    processPaymentFile.mockImplementation(async (filename) => {
+      events.push(`start ${filename}`)
+      await Promise.resolve()
+      events.push(`end ${filename}`)
+      if (filename === 'b.csv') {
+        throw new Error('bad file')
+      }
+    })
+
+    await start()
+
+    expect(events).toEqual(['start a.csv', 'end a.csv', 'start b.csv', 'end b.csv', 'start c.csv', 'end c.csv'])
+    expect(mockDb.trx.rollback).toHaveBeenCalledTimes(1)
+  })
+
   test('logs unexpected errors and reschedules', async () => {
     getInboundFileList.mockRejectedValue(new Error('storage down'))
 

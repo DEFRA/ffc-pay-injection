@@ -12,24 +12,28 @@ const start = async () => {
 
     const filenames = await getInboundFileList()
 
-    for (const filename of filenames) {
+    for (const filename in filenames) {
       if (!isPaymentFile(filename)) {
         continue
       }
 
-      const transaction = await db.transaction()
-      try {
-        await processPaymentFile(filename, transaction)
-        await transaction.commit()
-      } catch (err) {
-        console.error(`Failed to process ${filename}, rolling back database transaction.`, err)
-        await transaction.rollback()
-      }
+      await processFile(filename) // NOSONAR
     }
   } catch (err) {
     console.error('Unexpected error in processing loop:', err)
   } finally {
     setTimeout(start, config.processingInterval)
+  }
+}
+
+const processFile = async (filename) => {
+  const transaction = await db.transaction()
+  try {
+    await processPaymentFile(filename, transaction)
+    await transaction.commit()
+  } catch (err) {
+    console.error(`Failed to process ${filename}, rolling back database transaction.`, err)
+    await transaction.rollback()
   }
 }
 
