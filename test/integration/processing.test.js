@@ -1,11 +1,7 @@
 jest.useFakeTimers()
 
-const mockSendBatchMessages = jest.fn()
-jest.mock('ffc-messaging', () => ({
-  MessageBatchSender: jest.fn().mockImplementation(() => ({
-    sendBatchMessages: mockSendBatchMessages,
-    closeConnection: jest.fn()
-  }))
+jest.mock('../../app/messaging/service-bus/send-batch-messages', () => ({
+  sendBatchMessages: jest.fn()
 }))
 
 const mockPublishEvent = jest.fn()
@@ -18,6 +14,7 @@ jest.mock('ffc-pay-event-publisher', () => ({
 }))
 
 const path = require('path')
+const { sendBatchMessages: mockSendBatchMessages } = require('../../app/messaging/service-bus/send-batch-messages')
 const { BlobServiceClient } = require('@azure/storage-blob')
 
 const db = require('../../app/data')
@@ -64,7 +61,7 @@ describe('process files', () => {
 
     await start()
 
-    const message = mockSendBatchMessages.mock.calls[0][0][0].body
+    const message = mockSendBatchMessages.mock.calls[0][1][0].body
 
     expect(mockSendBatchMessages).toHaveBeenCalled()
     expect(message.frn).toBe('1000000001')
@@ -144,7 +141,7 @@ describe('process files', () => {
     await blockBlobClient.uploadFile(files[key])
     await start()
 
-    const message = mockSendBatchMessages.mock.calls[0][0]
+    const message = mockSendBatchMessages.mock.calls[0][1]
 
     if (key === 'multiLine') {
       expect(message[0].body.invoiceLines.length).toBe(expectedLength)
