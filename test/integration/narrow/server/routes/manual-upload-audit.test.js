@@ -1,8 +1,15 @@
 const { GET } = require('../../../../../app/constants/methods')
 const { SUCCESS, NOT_FOUND, INTERNAL_SERVER_ERROR } = require('../../../../../app/constants/status-codes')
-const db = require('../../../../../app/data')
+const { createKnexMock } = require('../../../../helpers/mock-knex')
 
-jest.mock('../../../../../app/data')
+const mockDb = createKnexMock(['manualUploads'])
+
+jest.mock('../../../../../app/database', () => ({
+  client: mockDb.knex,
+  transaction: mockDb.transaction,
+  close: mockDb.close,
+  ...mockDb.tables
+}))
 
 let server
 
@@ -23,7 +30,7 @@ describe('manual-upload-audit route', () => {
       { uploadId: 1, filename: 'test.csv', uploader: 'bob', timeStamp: new Date(), checksum: 'abc123' },
       { uploadId: 2, filename: 'data.csv', uploader: 'alice', timeStamp: new Date(), checksum: 'def456' }
     ]
-    db.manualUpload.findAll.mockResolvedValue(mockUploads)
+    mockDb.builder.resolves(mockUploads)
 
     const options = {
       method: GET,
@@ -33,16 +40,12 @@ describe('manual-upload-audit route', () => {
     const result = await server.inject(options)
     expect(result.statusCode).toBe(SUCCESS)
     expect(result.result).toEqual(mockUploads)
-    expect(db.manualUpload.findAll).toHaveBeenCalledWith(expect.objectContaining({
-      where: expect.objectContaining({
-        timeStamp: expect.any(Object)
-      }),
-      order: [['timeStamp', 'DESC']]
-    }))
+    expect(mockDb.builder.whereBetween).toHaveBeenCalledWith('timeStamp', [expect.any(Date), expect.any(Date)])
+    expect(mockDb.builder.orderBy).toHaveBeenCalledWith('timeStamp', 'desc')
   })
 
   test('GET /manual-upload-audit returns 404 if no uploads found', async () => {
-    db.manualUpload.findAll.mockResolvedValue([])
+    mockDb.builder.resolves([])
 
     const options = {
       method: GET,
@@ -55,7 +58,7 @@ describe('manual-upload-audit route', () => {
   })
 
   test('GET /manual-upload-audit returns 500 if an error occurs', async () => {
-    db.manualUpload.findAll.mockRejectedValue(new Error('DB failure'))
+    mockDb.builder.rejects(new Error('DB failure'))
 
     const options = {
       method: GET,
