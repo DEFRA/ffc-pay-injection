@@ -6,14 +6,22 @@ const {
   CONFLICT
 } = require('../../../../../app/constants/status-codes')
 
-jest.mock('../../../../../app/data')
+const { createKnexMock } = require('../../../../helpers/mock-knex')
+
+const mockDb = createKnexMock(['manualUploads'])
+
+jest.mock('../../../../../app/database', () => ({
+  client: mockDb.knex,
+  transaction: mockDb.transaction,
+  close: mockDb.close,
+  ...mockDb.tables
+}))
 jest.mock('../../../../../app/storage', () => ({
   getFileChecksum: jest.fn(),
   acceptFile: jest.fn(),
   quarantineFile: jest.fn()
 }))
 const url = '/manual-upload'
-const db = require('../../../../../app/data')
 const { getFileChecksum, acceptFile, quarantineFile } = require('../../../../../app/storage')
 
 let server
@@ -21,6 +29,7 @@ let server
 describe('manual-upload route', () => {
   beforeEach(async () => {
     jest.clearAllMocks()
+    mockDb.builder.resolves()
 
     const { createServer } = require('../../../../../app/server/create-server')
     server = await createServer()
@@ -45,7 +54,7 @@ describe('manual-upload route', () => {
 
   test('POST /manual-upload returns 409 if duplicate upload detected', async () => {
     getFileChecksum.mockResolvedValue('abc123')
-    db.manualUpload.findOne = jest.fn().mockResolvedValue({ filename: 'test.csv' })
+    mockDb.builder.resolves({ filename: 'test.csv' })
 
     const options = {
       method: POST,
@@ -57,12 +66,12 @@ describe('manual-upload route', () => {
     expect(result.statusCode).toBe(CONFLICT)
     expect(result.result.code).toBe('DUPLICATE_UPLOAD')
     expect(quarantineFile).toHaveBeenCalledWith('test.csv', 'staging')
+    expect(mockDb.builder.insert).not.toHaveBeenCalled()
   })
 
   test('POST /manual-upload returns 200 on successful upload', async () => {
     getFileChecksum.mockResolvedValue('xyz789')
-    db.manualUpload.findOne = jest.fn().mockResolvedValue(null)
-    db.manualUpload.create = jest.fn().mockResolvedValue({})
+    mockDb.builder.resolves(undefined)
     acceptFile.mockResolvedValue()
 
     const options = {
@@ -75,7 +84,11 @@ describe('manual-upload route', () => {
     expect(result.statusCode).toBe(SUCCESS)
     expect(result.result.code).toBe('UPLOAD_SUCCESS')
     expect(acceptFile).toHaveBeenCalledWith('good.csv')
-    expect(db.manualUpload.create).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mockDb.builder.where).toHaveBeenCalledWith('success', true)
+    expect(mockDb.builder.where).toHaveBeenCalledWith('filename', 'good.csv')
+    expect(mockDb.builder.orWhere).toHaveBeenCalledWith('checksum', 'xyz789')
+    expect(mockDb.builder.where).toHaveBeenCalledWith('success', false)
+    expect(mockDb.builder.insert).toHaveBeenCalledWith(expect.objectContaining({
       uploader: 'charlie',
       filename: 'good.csv',
       checksum: 'xyz789'

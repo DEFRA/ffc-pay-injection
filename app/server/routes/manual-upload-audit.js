@@ -1,7 +1,6 @@
 const Boom = require('@hapi/boom')
 const Joi = require('joi')
-const { Op } = require('sequelize')
-const db = require('../../data')
+const { manualUploads } = require('../../database')
 const { SUCCESS } = require('../../constants/status-codes')
 
 const START_OF_DAY = { hours: 0, minutes: 0, seconds: 0, ms: 0 }
@@ -29,14 +28,9 @@ module.exports = {
       const toDate = new Date(to)
       toDate.setHours(END_OF_DAY.hours, END_OF_DAY.minutes, END_OF_DAY.seconds, END_OF_DAY.ms)
 
-      const uploads = await db.manualUpload.findAll({
-        where: {
-          timeStamp: {
-            [Op.between]: [new Date(fromDate), new Date(toDate)]
-          }
-        },
-        order: [['timeStamp', 'DESC']]
-      })
+      const uploads = await manualUploads()
+        .whereBetween('timeStamp', [new Date(fromDate), new Date(toDate)])
+        .orderBy('timeStamp', 'desc')
 
       if (!uploads || uploads.length === 0) {
         const fromFormatted = new Date(from).toLocaleDateString('en-UK')
