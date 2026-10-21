@@ -1,31 +1,33 @@
-jest.mock('../../../app/data')
+const { createKnexMock } = require('../../helpers/mock-knex')
 
-const db = require('../../../app/data')
+const mockDb = createKnexMock(['manualUploads'])
+
+jest.mock('../../../app/database', () => ({
+  client: mockDb.knex,
+  transaction: mockDb.transaction,
+  close: mockDb.close,
+  ...mockDb.tables
+}))
+
 const { updateSuccess } = require('../../../app/processing/update-success')
 
 describe('updateSuccess', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    db.manualUpload = {
-      update: jest.fn().mockResolvedValue()
-    }
+    mockDb.builder.resolves()
   })
 
-  test('calls db.manualUpload.update with correct parameters', async () => {
-    const filename = 'testfile.csv'
-    const success = true
+  test('updates manualUploads success for the filename', async () => {
+    await updateSuccess('testfile.csv', true)
 
-    await updateSuccess(filename, success)
-
-    expect(db.manualUpload.update).toHaveBeenCalledWith(
-      { success },
-      { where: { filename } }
-    )
+    expect(mockDb.tables.manualUploads).toHaveBeenCalledTimes(1)
+    expect(mockDb.builder.where).toHaveBeenCalledWith({ filename: 'testfile.csv' })
+    expect(mockDb.builder.update).toHaveBeenCalledWith({ success: true })
   })
 
-  test('propagates error if db.manualUpload.update rejects', async () => {
+  test('propagates error if update rejects', async () => {
     const error = new Error('DB error')
-    db.manualUpload.update.mockRejectedValue(error)
+    mockDb.builder.rejects(error)
 
     await expect(updateSuccess('file.csv', true)).rejects.toThrow(error)
   })
