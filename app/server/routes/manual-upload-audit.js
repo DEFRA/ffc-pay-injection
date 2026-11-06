@@ -36,9 +36,9 @@ module.exports = {
         const fromFormatted = new Date(from).toLocaleDateString('en-UK')
         const toFormatted = new Date(to).toLocaleDateString('en-UK')
 
-        throw Boom.notFound(
-          `No manual uploads found between ${fromFormatted} and ${toFormatted}`
-        )
+        console.log(`No manual uploads found between ${fromFormatted} and ${toFormatted}`)
+
+        return h.response([]).code(SUCCESS)
       }
 
       return h.response(uploads).code(SUCCESS)
