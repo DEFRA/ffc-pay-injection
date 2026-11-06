@@ -1,5 +1,5 @@
 const { GET } = require('../../../../../app/constants/methods')
-const { SUCCESS, NOT_FOUND, INTERNAL_SERVER_ERROR } = require('../../../../../app/constants/status-codes')
+const { SUCCESS, INTERNAL_SERVER_ERROR } = require('../../../../../app/constants/status-codes')
 const { createKnexMock } = require('../../../../helpers/mock-knex')
 
 const mockDb = createKnexMock(['manualUploads'])
