@@ -1,5 +1,5 @@
 const { GET } = require('../../../../../app/constants/methods')
-const { SUCCESS, NOT_FOUND, INTERNAL_SERVER_ERROR } = require('../../../../../app/constants/status-codes')
+const { SUCCESS, INTERNAL_SERVER_ERROR } = require('../../../../../app/constants/status-codes')
 const { createKnexMock } = require('../../../../helpers/mock-knex')
 
 const mockDb = createKnexMock(['manualUploads'])
@@ -44,7 +44,7 @@ describe('manual-upload-audit route', () => {
     expect(mockDb.builder.orderBy).toHaveBeenCalledWith('timeStamp', 'desc')
   })
 
-  test('GET /manual-upload-audit returns 404 if no uploads found', async () => {
+  test('GET /manual-upload-audit returns 200 if no uploads found', async () => {
     mockDb.builder.resolves([])
 
     const options = {
@@ -53,8 +53,8 @@ describe('manual-upload-audit route', () => {
     }
 
     const result = await server.inject(options)
-    expect(result.statusCode).toBe(NOT_FOUND)
-    expect(result.result.message).toContain('No manual uploads found between')
+    expect(result.statusCode).toBe(SUCCESS)
+    expect(result.result).toEqual([])
   })
 
   test('GET /manual-upload-audit returns 500 if an error occurs', async () => {
