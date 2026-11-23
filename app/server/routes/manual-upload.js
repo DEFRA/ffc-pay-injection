@@ -10,6 +10,22 @@ const { POST } = require('../../constants/methods')
 const { manualUploads } = require('../../database')
 const { getFileChecksum, acceptFile, quarantineFile } = require('../../storage')
 
+const rejectDuplicate = async (h, filename, quarantine) => {
+  console.warn('Duplicate manual upload detected', { filename })
+
+  if (quarantine) {
+    await quarantineFile(filename, 'staging')
+  }
+
+  return h.response({
+    error: 'Duplicate upload detected',
+    message: quarantine
+      ? `The file "${filename}" has already been uploaded. To prevent accidental reprocessing, it has been moved to the quarantine area. Please ensure you are uploading the correct and most recent file.`
+      : `An upload for "${filename}" has already been registered. The staged file was not moved.`,
+    code: 'DUPLICATE_UPLOAD'
+  }).code(CONFLICT)
+}
+
 module.exports = {
   method: POST,
   path: '/manual-upload',
@@ -37,38 +53,29 @@ module.exports = {
     try {
       const checksum = await getFileChecksum(filename)
 
-      const existingAndSuccessful = await manualUploads()
-        .where(function () {
-          this.where(function () {
-            this.where('success', true).andWhere(function () {
-              this.where('filename', filename).orWhere('checksum', checksum)
-            })
-          }).orWhere(function () {
-            this.where('success', false).andWhere('filename', filename)
-          })
+      const existingUpload = await manualUploads()
+        .where('filename', filename)
+        .orWhere(function () {
+          this.where('checksum', checksum).andWhere('success', true)
         })
-        .first() ?? null
+        .first()
 
-      if (existingAndSuccessful) {
-        await quarantineFile(filename, 'staging')
-
-        return h
-          .response({
-            error: 'Duplicate upload detected',
-            message: `The file "${filename}" has already been uploaded. To prevent accidental reprocessing, it has been moved to the quarantine area. Please ensure you are uploading the correct and most recent file.`,
-            code: 'DUPLICATE_UPLOAD'
-          })
-          .code(CONFLICT)
+      if (existingUpload) {
+        return await rejectDuplicate(h, filename, existingUpload.success !== null)
       }
 
-      await acceptFile(filename)
-
-      await manualUploads().insert({
+      const [reservation] = await manualUploads().insert({
         uploader,
         filename,
         timeStamp: new Date(),
         checksum
-      })
+      }).onConflict('filename').ignore().returning('uploadId')
+
+      if (!reservation) {
+        return await rejectDuplicate(h, filename, false)
+      }
+
+      await acceptFile(filename)
 
       return h
         .response({
@@ -77,7 +84,7 @@ module.exports = {
         })
         .code(SUCCESS)
     } catch (err) {
-      console.error('Manual upload error:', err)
+      console.error('Manual upload error:', err, { filename })
 
       return h
         .response({

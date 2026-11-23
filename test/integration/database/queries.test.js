@@ -6,7 +6,7 @@ jest.mock('../../../app/storage', () => ({
 
 const db = require('../../../app/database')
 const { truncate } = require('../../helpers/truncate')
-const { getFileChecksum } = require('../../../app/storage')
+const { getFileChecksum, acceptFile, quarantineFile } = require('../../../app/storage')
 const { updateSuccess } = require('../../../app/processing/update-success')
 const { createInvoiceNumber } = require('../../../app/processing/create-invoice-number')
 const { removeAgreementData } = require('../../../app/retention')
@@ -60,6 +60,35 @@ describe('database queries against Postgres', () => {
       expect(result.statusCode).toBe(CONFLICT)
     })
 
+    test('rejects the same filename even after the existing pending upload is backdated', async () => {
+      await db.manualUploads().insert(upload({ success: null }))
+      const timeStamp = new Date('2024-01-01T12:00:00Z')
+      await db.manualUploads().where({ filename: 'a.csv' }).update({ timeStamp })
+      const originalRows = await db.manualUploads().where({ filename: 'a.csv' })
+      getFileChecksum.mockResolvedValue('different-checksum')
+
+      const result = await post('a.csv')
+
+      expect(result.statusCode).toBe(CONFLICT)
+      expect(result.result.code).toBe('DUPLICATE_UPLOAD')
+      expect(quarantineFile).not.toHaveBeenCalled()
+      expect(acceptFile).not.toHaveBeenCalled()
+      const rows = await db.manualUploads().where({ filename: 'a.csv' })
+      expect(rows).toEqual(originalRows)
+    })
+
+    test('accepts only one of two concurrent requests for the same filename', async () => {
+      getFileChecksum.mockResolvedValue('abc')
+
+      const results = await Promise.all([post('a.csv'), post('a.csv')])
+
+      expect(results.map(result => result.statusCode)).toEqual(expect.arrayContaining([SUCCESS, CONFLICT]))
+      expect(results.find(result => result.statusCode === CONFLICT).result.code).toBe('DUPLICATE_UPLOAD')
+      expect(acceptFile).toHaveBeenCalledTimes(1)
+      expect(quarantineFile).not.toHaveBeenCalled()
+      expect(await db.manualUploads().where({ filename: 'a.csv' })).toHaveLength(1)
+    })
+
     test('accepts a file whose only match is a failed upload with the same checksum', async () => {
       await db.manualUploads().insert(upload({ filename: 'x.csv', success: false }))
       getFileChecksum.mockResolvedValue('abc')
@@ -71,6 +100,15 @@ describe('database queries against Postgres', () => {
       expect(rows).toHaveLength(1)
       expect(rows[0].uploader).toBe('ann')
     })
+  })
+
+  test('the database rejects a duplicate filename regardless of checksum or timestamp', async () => {
+    await db.manualUploads().insert(upload({ success: null }))
+
+    await expect(db.manualUploads().insert(upload({
+      checksum: 'other',
+      timeStamp: new Date('2024-01-01T12:00:00Z')
+    }))).rejects.toMatchObject({ code: '23505', constraint: 'uq_manual_upload_filename' })
   })
 
   describe('manual upload audit route', () => {

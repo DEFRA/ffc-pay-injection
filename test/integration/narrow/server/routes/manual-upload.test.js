@@ -30,6 +30,7 @@ describe('manual-upload route', () => {
   beforeEach(async () => {
     jest.clearAllMocks()
     mockDb.builder.resolves()
+    mockDb.builder.returning.mockResolvedValue([{ uploadId: 1 }])
 
     const { createServer } = require('../../../../../app/server/create-server')
     server = await createServer()
@@ -37,6 +38,7 @@ describe('manual-upload route', () => {
   })
 
   afterEach(async () => {
+    jest.restoreAllMocks()
     await server.stop()
   })
 
@@ -53,8 +55,9 @@ describe('manual-upload route', () => {
   })
 
   test('POST /manual-upload returns 409 if duplicate upload detected', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {})
     getFileChecksum.mockResolvedValue('abc123')
-    mockDb.builder.resolves({ filename: 'test.csv' })
+    mockDb.builder.resolves({ filename: 'test.csv', success: true })
 
     const options = {
       method: POST,
@@ -65,7 +68,9 @@ describe('manual-upload route', () => {
     const result = await server.inject(options)
     expect(result.statusCode).toBe(CONFLICT)
     expect(result.result.code).toBe('DUPLICATE_UPLOAD')
+    expect(warn).toHaveBeenCalledWith('Duplicate manual upload detected', { filename: 'test.csv' })
     expect(quarantineFile).toHaveBeenCalledWith('test.csv', 'staging')
+    expect(acceptFile).not.toHaveBeenCalled()
     expect(mockDb.builder.insert).not.toHaveBeenCalled()
   })
 
@@ -84,15 +89,31 @@ describe('manual-upload route', () => {
     expect(result.statusCode).toBe(SUCCESS)
     expect(result.result.code).toBe('UPLOAD_SUCCESS')
     expect(acceptFile).toHaveBeenCalledWith('good.csv')
-    expect(mockDb.builder.where).toHaveBeenCalledWith('success', true)
     expect(mockDb.builder.where).toHaveBeenCalledWith('filename', 'good.csv')
-    expect(mockDb.builder.orWhere).toHaveBeenCalledWith('checksum', 'xyz789')
-    expect(mockDb.builder.where).toHaveBeenCalledWith('success', false)
+    expect(mockDb.builder.where).toHaveBeenCalledWith('checksum', 'xyz789')
+    expect(mockDb.builder.andWhere).toHaveBeenCalledWith('success', true)
     expect(mockDb.builder.insert).toHaveBeenCalledWith(expect.objectContaining({
       uploader: 'charlie',
       filename: 'good.csv',
       checksum: 'xyz789'
     }))
+  })
+
+  test('POST /manual-upload returns 409 without moving the blob if another request reserves the filename', async () => {
+    getFileChecksum.mockResolvedValue('xyz789')
+    mockDb.builder.returning.mockResolvedValue([])
+
+    const result = await server.inject({
+      method: POST,
+      url,
+      payload: { uploader: 'charlie', filename: 'race.csv' }
+    })
+
+    expect(result.statusCode).toBe(CONFLICT)
+    expect(result.result.code).toBe('DUPLICATE_UPLOAD')
+    expect(mockDb.builder.onConflict).toHaveBeenCalledWith('filename')
+    expect(acceptFile).not.toHaveBeenCalled()
+    expect(quarantineFile).not.toHaveBeenCalled()
   })
 
   test('POST /manual-upload returns 500 if an unexpected error occurs', async () => {
